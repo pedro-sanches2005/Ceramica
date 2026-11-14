@@ -21,7 +21,7 @@ export default function GuiaRolagem({ p, texto, passos }: { p: MotionValue<numbe
           ? <path className="guia-seta" d="M8.5 14.5l3.8 3.8 7.2-8" />
           : <path className="guia-seta" d="M14 8v11M9.5 14.5L14 19l4.5-4.5" />}
       </svg>
-      <span className="mono">
+      <span>
         {fim ? "Pronto" : texto}
         {passos && !fim && <b> · {String(passo).padStart(2, "0")}/{String(passos).padStart(2, "0")}</b>}
       </span>

@@ -2,11 +2,13 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FONES, wa } from "@/lib/dados";
+import { IcWhats } from "./Icone";
+import Rola from "./Rola";
 
 const links = [
   { h: "#processo", t: "Fábrica" },
   { h: "#blocos", t: "Blocos" },
-  { h: "#paginacao", t: "Paginação" },
+  { h: "#paginacao", t: "Calcular parede" },
   { h: "#contato", t: "Contato" },
 ];
 
@@ -36,12 +38,12 @@ export default function Menu() {
             <ol>
               {links.map((l, i) => (
                 <motion.li key={l.h} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 + i * 0.06, duration: 0.45 }}>
-                  <a href={l.h} onClick={() => setAberto(false)}><small className="mono">{String(i + 1).padStart(2, "0")}</small>{l.t}</a>
+                  <a href={l.h} onClick={() => setAberto(false)}>{l.t}</a>
                 </motion.li>
               ))}
             </ol>
             <motion.div className="menu-p" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45 }}>
-              <a className="bt" target="_blank" rel="noopener noreferrer" href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}>Pedir cotação</a>
+              <a className="bt" target="_blank" rel="noopener noreferrer" href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}><Rola><IcWhats />Cotar no WhatsApp</Rola></a>
               <p className="mono">{FONES.slice(0, 2).map((f) => <a key={f.tel} href={`tel:${f.tel}`}>{f.label}</a>)}</p>
             </motion.div>
           </motion.nav>

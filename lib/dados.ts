@@ -71,14 +71,14 @@ export const itens: Item[] = [
       P("v939-meio", "Meio bloco de amarração", "9 × 19 × 19", ["Peso", "2,9 kg"]),
       P("v939-canaleta-u", "Canaleta U", "9 × 19 × 39", ["Rendimento", "2,56 pçs/ml"], ["Peso", "6,2 kg"]),
     ] },
-  { id: "v11529", fam: "Vedação", linha: "11,5", dim: [11.5, 19, 29], cel: [2, 3],
+  { id: "v11529", fam: "Vedação", linha: "11,5 × 29", dim: [11.5, 19, 29], cel: [2, 3],
     specs: [["Parede de 11,5 cm", "16,5 pçs/m²"], ["Parede de 19 cm", "26,5 pçs/m²"], ["Peso por peça", "3,7 kg"], ["Carga aprox.", "3.500 pçs"]],
     pecas: [
       P("v11529-bloco", "Bloco de vedação", "11,5 × 19 × 29", ["Parede de 11,5 cm", "16,5 pçs/m²"], ["Parede de 19 cm", "26,5 pçs/m²"], ["Peso", "3,7 kg"], ["Carga aprox.", "3.500 pçs"]),
       P("v11529-meio", "Meio bloco de amarração", "11,5 × 19 × 14", ["Peso", "2,2 kg"]),
       P("v11529-canaleta-u", "Canaleta U", "11,5 × 19 × 29", ["Rendimento", "3,45 pçs/ml"], ["Peso", "3,5 kg"]),
     ] },
-  { id: "v11524", fam: "Vedação", linha: "11,5", dim: [11.5, 14, 24], cel: [2, 2],
+  { id: "v11524", fam: "Vedação", linha: "11,5 × 24", dim: [11.5, 14, 24], cel: [2, 2],
     specs: [["Parede de 11,5 cm", "26,5 pçs/m²"], ["Parede de 14 cm", "32 pçs/m²"], ["Peso por peça", "2,1 kg"], ["Carga aprox.", "6.000 pçs"]],
     pecas: [
       P("v11524-bloco", "Bloco de vedação", "11,5 × 14 × 24", ["Parede de 11,5 cm", "26,5 pçs/m²"], ["Parede de 14 cm", "32 pçs/m²"], ["Peso", "2,1 kg"], ["Carga aprox.", "6.000 pçs"]),
@@ -103,6 +103,8 @@ export const itens: Item[] = [
 
 export const fmt = (n: number) => String(n).replace(".", ",");
 export const fotoPeca = (img: string) => `/pecas/${img}.png`;
+// Furo vertical (estruturais e a vedação 9/39 "furo vertical") ou horizontal (vedação comum): muda o desenho técnico.
+export const furoDe = (i: { id: string; fam: Item["fam"] }): "v" | "h" => (i.fam === "Estrutural" || i.id === "v939" ? "v" : "h");
 export const totalPecas = itens.reduce((s, i) => s + i.pecas.length, 0);
 
 // Linhas que podem ser "paginadas": todas têm meio bloco e altura 19 cm.
@@ -115,7 +117,7 @@ export const modulos: Modulo[] = [
   { id: "e11539", fam: "Estrutural", nome: "Estrutural 11,5/39", w: 11.5, l: 39, meio: 19, u: true },
   { id: "v939", fam: "Vedação", nome: "Vedação 9/39", w: 9, l: 39, meio: 19, u: true },
   { id: "v929", fam: "Vedação", nome: "Vedação 9", w: 9, l: 29, meio: 14, u: false },
-  { id: "v11529", fam: "Vedação", nome: "Vedação 11,5", w: 11.5, l: 29, meio: 14, u: true },
+  { id: "v11529", fam: "Vedação", nome: "Vedação 11,5 × 29", w: 11.5, l: 29, meio: 14, u: true },
   { id: "v1429", fam: "Vedação", nome: "Vedação 14", w: 14, l: 29, meio: 14, u: true },
   { id: "v1929", fam: "Vedação", nome: "Vedação 19", w: 19, l: 29, meio: 14, u: true },
 ];

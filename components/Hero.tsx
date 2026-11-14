@@ -1,46 +1,33 @@
-"use client";
-import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import BlocoIso from "./BlocoIso";
-import Palavras from "./Palavras";
-import GuiaRolagem from "./GuiaRolagem";
-import { useCelular } from "@/lib/useCelular";
+import { IcWhats } from "./Icone";
+import NotaCotacao from "./NotaCotacao";
+import Rola from "./Rola";
+import TopoBackground from "./TopoBackground";
+import { wa } from "@/lib/dados";
 
+// Primeira tela: curvas de nível vivas (Topo Background do KokonutUI) no fundo, lembrando o relevo da jazida;
+// o conteúdo vem sempre por cima. Textos e foto são os mesmos de antes.
 export default function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const cel = useCelular();
-  const reduz = useReducedMotion() || cel; // no celular o bloco já aparece pronto, sem cena de rolagem
-  const { scrollYProgress: sp } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const prof = useTransform(sp, [0.03, 0.72], [0.02, 1]);
-  const a = useTransform(sp, [0.28, 0.38], [0, 1]);
-  const b = useTransform(sp, [0.48, 0.58], [0, 1]);
-  const c = useTransform(sp, [0.66, 0.76], [0, 1]);
-  const guia = useTransform(sp, [0, 0.78], [0, 1]); // o bloco fica completo por volta de 78%
-
   return (
-    <div ref={ref} className="hero-wrap" id="topo">
-      <section className="hero">
+    <section className="hero" id="topo">
+      <TopoBackground className="hero-topo" interval={0.075} speed={0.8}>
         <div className="hero-in">
           <div className="hero-txt">
-            <span className="kick mono">Cerâmica · Itu/SP · há mais de 20 anos</span>
-            <h1><Palavras texto="Bloco que" /><br /><em><Palavras texto="segura a obra." de={2} /></em></h1>
-            <p>Blocos cerâmicos estruturais e de vedação, fabricados em linha automatizada e forno túnel, conforme as normas ABNT NBR 15270 e 15575.</p>
+            <h1>Bloco que segura a obra.</h1>
+            <p className="hero-lead">Blocos cerâmicos estruturais e de vedação, fabricados em Itu/SP há mais de 20 anos, em linha automatizada e forno túnel.</p>
+            <p className="hero-norma"><span>ABNT NBR 15270 e 15575</span><span>Entrega em todo o Estado de SP</span></p>
             <div className="cta">
-              <a className="bt" href="#blocos">Ver os blocos</a>
-              <a className="bt ln" href="#paginacao">Paginar minha parede</a>
+              <a className="bt" target="_blank" rel="noopener noreferrer"
+                href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}><Rola><IcWhats />Cotar no WhatsApp</Rola></a>
+              <a className="bt ln" href="#paginacao"><Rola>Calcular minha parede</Rola></a>
             </div>
+            <NotaCotacao />
           </div>
-          <div className="hero-art">
-            <BlocoIso dim={[14, 19, 29]} cel={[3, 3]} prof={reduz ? undefined : prof} />
-            <div className="leituras mono">
-              <motion.span style={{ opacity: reduz ? 1 : a }}>14 × 19 × 29 cm</motion.span>
-              <motion.span style={{ opacity: reduz ? 1 : b }}>6 MPa</motion.span>
-              <motion.span style={{ opacity: reduz ? 1 : c }}>16,5 pçs/m²</motion.span>
-            </div>
-          </div>
+          <figure className="hero-foto">
+            <img src="/fabrica/blocos.jpg" alt="Pilhas de blocos cerâmicos da Incargel prontos para a expedição" width={615} height={410} decoding="async" fetchPriority="high" />
+            <figcaption>Blocos prontos para a expedição · Itu/SP</figcaption>
+          </figure>
         </div>
-        {!reduz && <GuiaRolagem p={guia} texto="Role para montar o bloco" />}
-      </section>
-    </div>
+      </TopoBackground>
+    </section>
   );
 }

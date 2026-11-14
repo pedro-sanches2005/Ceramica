@@ -1,122 +1,92 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import BlocoIso from "./BlocoIso";
+import { useState } from "react";
 import Familia from "./Familia";
+import { IcSeta, IcWhats } from "./Icone";
+import Rola from "./Rola";
 import { fmt, fotoPeca, itens, totalPecas, wa, type Item } from "@/lib/dados";
 
-type Fam = "Estrutural" | "Vedação";
+type Fam = Item["fam"];
+// Colunas fixas por grupo: cada coluna guarda sempre a mesma grandeza, na mesma unidade.
+// Na vedação, "Rendimento" é o da parede na espessura do próprio bloco (a outra posição aparece no detalhe).
+const COLUNAS: Record<Fam, { rot: string; pega: (it: Item) => string | undefined }[]> = {
+  Estrutural: [
+    { rot: "Resistência", pega: (it) => spec(it, "Resistência") },
+    { rot: "Rendimento", pega: (it) => spec(it, "Rendimento") },
+    { rot: "Peso por peça", pega: (it) => spec(it, "Peso") },
+  ],
+  Vedação: [
+    { rot: "Rendimento", pega: (it) => spec(it, "Rendimento") ?? spec(it, "Parede") },
+    { rot: "Peso por peça", pega: (it) => spec(it, "Peso") },
+    { rot: "Carga aprox.", pega: (it) => spec(it, "Carga") },
+  ],
+};
+function spec(it: Item, inicio: string) { return it.specs.find(([k]) => k.startsWith(inicio))?.[1]; }
 
-function Card({ it, n, onFamilia }: { it: Item; n: number; onFamilia: (it: Item) => void }) {
-  const [virado, setVirado] = useState(false);
+// Uma linha da tabela: foto, medidas, as 3 colunas do grupo e a cotação. O detalhe abre ali mesmo.
+function Linha({ it, aberta, alterna }: { it: Item; aberta: boolean; alterna: () => void }) {
   const nome = `${fmt(it.dim[0])} × ${it.dim[1]} × ${it.dim[2]}`;
   const tipo = it.fam === "Estrutural" ? "estrutural" : "de vedação";
   const cotar = wa(`Olá! Vim pelo site da Incargel e gostaria de uma cotação do bloco ${tipo} ${nome} cm (linha ${it.linha}).`);
-  const extras = it.pecas.slice(1);
-
+  const idDet = `det-${it.id}`;
   return (
-    <motion.article className={`card${virado ? " virado" : ""}`}
-      initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.4, delay: n * 0.06, ease: [0.2, 0.8, 0.2, 1] }}>
-      <div className="card-in">
-        {/* frente: o bloco */}
-        <div className="face frente" inert={virado}>
-          <header className="card-t mono"><b>{String(n + 1).padStart(2, "0")}</b><span>Linha {it.linha}</span></header>
-          <div className="card-foto">
-            <img src={fotoPeca(it.pecas[0].img)} alt={`Bloco ${tipo} ${nome} cm da Incargel`} loading="lazy" decoding="async" />
-          </div>
-          <h3 className="mono">{nome}<small>cm</small></h3>
-          <p className="card-k mono">{it.specs.slice(0, 2).map(([, v]) => v).join(" · ")}</p>
-          {/* miniaturas da família: um convite para abrir a ficha completa */}
-          <button type="button" className="card-fam" onClick={() => onFamilia(it)} aria-label={`Ver a família completa da linha ${it.linha}, ${it.pecas.length} peças`}>
-            <span className="card-mini" aria-hidden>
-              {extras.slice(0, 4).map((p) => <img key={p.img} src={fotoPeca(p.img)} alt="" loading="lazy" />)}
-            </span>
-            <span className="mono">+{extras.length} peças da linha</span>
-            <i aria-hidden>→</i>
-          </button>
-          <div className="card-a">
-            <button type="button" className="bt bt-sm" onClick={() => setVirado(true)} aria-label={`Ver medidas do bloco ${nome}`}>Ver medidas</button>
-            <a className="card-z mono" href={cotar} target="_blank" rel="noopener noreferrer">Cotar ↗</a>
-          </div>
+    <li className={`lin${aberta ? " aberta" : ""}`}>
+      <div className="lin-row">
+        <img className="lin-foto" src={fotoPeca(it.pecas[0].img)} alt={`Bloco ${tipo} ${nome} cm`} width={120} height={120} loading="lazy" decoding="async" />
+        <div className="lin-nome">
+          <span className="mono lin-cod">Linha {it.linha}</span>
+          <h4 className="mono">{nome}<small>cm</small></h4>
         </div>
-
-        {/* verso: desenho técnico com as cotas */}
-        <div className="face verso" inert={!virado}>
-          <header className="card-t mono"><b>{String(n + 1).padStart(2, "0")}</b><span>Medidas em cm</span></header>
-          <div className="card-iso"><BlocoIso dim={it.dim} cel={it.cel} /></div>
-          <dl className="card-s mono">
-            {it.specs.map(([k, v]) => (<div key={k}><dt>{k}</dt><dd>{v}</dd></div>))}
-          </dl>
-          <div className="card-a">
-            <button type="button" className="bt bt-sm ln" onClick={() => setVirado(false)}>← Ver bloco</button>
-            <button type="button" className="card-z mono" onClick={() => onFamilia(it)}>Família ({it.pecas.length}) →</button>
-          </div>
+        <dl className="lin-d">
+          {COLUNAS[it.fam].map((c) => <div key={c.rot}><dt>{c.rot}</dt><dd className="mono">{c.pega(it) ?? "—"}</dd></div>)}
+        </dl>
+        <div className="lin-a">
+          <a className="bt bt-sm" href={cotar} target="_blank" rel="noopener noreferrer" aria-label={`Cotar o bloco ${nome} no WhatsApp`}><Rola><IcWhats size={16} />Cotar</Rola></a>
+          <button type="button" className="lin-mais" onClick={alterna} aria-expanded={aberta} aria-controls={idDet}>
+            {aberta ? "Fechar" : `Detalhes e ${it.pecas.length} peças`}
+            <IcSeta size={14} dir={aberta ? "cima" : "baixo"} />
+          </button>
         </div>
       </div>
-    </motion.article>
+      <div id={idDet} hidden={!aberta}>{aberta && <Familia it={it} />}</div>
+    </li>
   );
 }
 
 export default function Catalogo() {
-  const [fam, setFam] = useState<Fam>("Estrutural");
-  const [aberta, setAberta] = useState<Item | null>(null);
-  const fechar = useCallback(() => setAberta(null), []);
-  const lista = itens.filter((i) => i.fam === fam);
-  const trilho = useRef<HTMLDivElement>(null);
-  const [idx, setIdx] = useState(0);
-  const [mexeu, setMexeu] = useState(false);
-
-  // qual card está no centro do carrossel
-  function rolou() {
-    const el = trilho.current; if (!el) return;
-    const filhos = Array.from(el.children) as HTMLElement[];
-    if (!filhos.length) return;
-    const meio = el.scrollLeft + el.clientWidth / 2;
-    let melhor = 0, dist = Infinity;
-    filhos.forEach((f, i) => { const d = Math.abs(f.offsetLeft + f.offsetWidth / 2 - meio); if (d < dist) { dist = d; melhor = i; } });
-    setIdx(melhor);
-    if (el.scrollLeft > 20) setMexeu(true);
-  }
-  function ir(i: number) {
-    const el = trilho.current; const f = el?.children[i] as HTMLElement | undefined;
-    if (el && f) el.scrollTo({ left: f.offsetLeft - (el.clientWidth - f.offsetWidth) / 2, behavior: "smooth" });
-  }
-  useEffect(() => { trilho.current?.scrollTo({ left: 0 }); setIdx(0); }, [fam]);
+  const [aberta, setAberta] = useState<string | null>(null);
+  const grupos = [
+    { f: "Estrutural" as const, t: "Estruturais", s: "a própria parede sustenta a obra" },
+    { f: "Vedação" as const, t: "Vedação", s: "a parede fecha os vãos entre vigas e pilares" },
+  ];
 
   return (
     <section id="blocos" className="cat">
       <header className="cat-h">
-        <div>
-          <span className="kick mono">Catálogo técnico · {totalPecas} peças</span>
-          <h2>Escolha o bloco.<br /><em>Veja o que ele entrega.</em></h2>
-        </div>
-        <div className="seg" role="group" aria-label="Tipo de bloco">
-          {(["Estrutural", "Vedação"] as const).map((f) => (
-            <button key={f} aria-pressed={fam === f} onClick={() => setFam(f)}>
-              {f === "Estrutural" ? "Estruturais" : "Vedação"}
-              <small className="mono">{itens.filter((i) => i.fam === f).reduce((s, i) => s + i.pecas.length, 0)}</small>
-            </button>
-          ))}
-        </div>
+        <h2>Escolha o bloco.</h2>
+        <p className="cat-p">{itens.length} linhas e {totalPecas} peças, lado a lado. Compare os dados, cote direto ou abra a linha para ver o desenho técnico e todas as peças da família.</p>
       </header>
 
-      {/* no celular vira carrossel de arrastar para o lado (scroll-snap); no desktop é grade */}
-      <div className="cards" ref={trilho} onScroll={rolou}>
-        <AnimatePresence mode="popLayout">
-          {lista.map((it, n) => <Card key={it.id} it={it} n={n} onFamilia={setAberta} />)}
-        </AnimatePresence>
-      </div>
-      <div className="cards-nav" aria-hidden>
-        <span className="mono"><b>{String(idx + 1).padStart(2, "0")}</b> / {String(lista.length).padStart(2, "0")}</span>
-        <span className="cards-dots">
-          {lista.map((it, i) => <i key={it.id} className={i === idx ? "on" : ""} onClick={() => ir(i)} />)}
-        </span>
-        <span className={`cards-dica mono${mexeu ? " some" : ""}`}>Arraste <i>→</i></span>
-      </div>
-      <p className="aviso mono">Imagens e dados da apresentação institucional da Incargel.</p>
-
-      <AnimatePresence>{aberta && <Familia key={aberta.id} it={aberta} onClose={fechar} />}</AnimatePresence>
+      {grupos.map((g) => {
+        const lista = itens.filter((i) => i.fam === g.f);
+        return (
+          <div key={g.f} className="grupo">
+            <h3 className="grupo-t">{g.t} <small>{lista.length} linhas · {g.s}</small></h3>
+            {/* cabeçalho da planilha: as unidades aparecem uma vez, não em cada célula */}
+            <div className="lin-head" aria-hidden>
+              <span />
+              <span>Linha e medidas</span>
+              <span className="lin-head-d">{COLUNAS[g.f].map((c) => <span key={c.rot}>{c.rot}</span>)}</span>
+              <span />
+            </div>
+            <ul className="tabela">
+              {lista.map((it) => (
+                <Linha key={it.id} it={it} aberta={aberta === it.id} alterna={() => setAberta(aberta === it.id ? null : it.id)} />
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+      <p className="aviso">Imagens e dados da apresentação institucional da Incargel. Na vedação, o rendimento é o da parede na espessura do bloco; a outra posição está no detalhe da linha.</p>
     </section>
   );
 }

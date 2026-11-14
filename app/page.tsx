@@ -7,6 +7,8 @@ import Compromissos from "@/components/Compromissos";
 import Contato from "@/components/Contato";
 import Marca from "@/components/Marca";
 import Menu from "@/components/Menu";
+import { IcWhats } from "@/components/Icone";
+import Rola from "@/components/Rola";
 import { wa } from "@/lib/dados";
 
 export default function Home() {
@@ -15,16 +17,16 @@ export default function Home() {
       <header className="top">
         <a className="marca" href="#topo" aria-label="Incargel, início">
           <Marca />
-          <span>INCARGEL<small className="mono">Indústria de cerâmica</small></span>
+          <span>INCARGEL<small>Indústria de cerâmica · Itu/SP</small></span>
         </a>
-        <nav aria-label="Seções">
+        <nav className="nav-d" aria-label="Seções">
           <a href="#processo">Fábrica</a>
           <a href="#blocos">Blocos</a>
-          <a href="#paginacao">Paginação</a>
+          <a href="#paginacao">Calcular parede</a>
           <a href="#contato">Contato</a>
         </nav>
-        <a className="bt bt-sm" target="_blank" rel="noopener noreferrer"
-          href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}>Cotação</a>
+        <a className="bt bt-sm" target="_blank" rel="noopener noreferrer" aria-label="Cotar no WhatsApp"
+          href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}><Rola><IcWhats size={16} />Cotar</Rola></a>
         <Menu />
       </header>
       <Hero />

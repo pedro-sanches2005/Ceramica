@@ -2,42 +2,42 @@
 import { useRef, useState } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import GuiaRolagem from "./GuiaRolagem";
+import { IcSeta } from "./Icone";
 import { useCelular } from "@/lib/useCelular";
 
 const est = [
   { n: "01", t: "Matéria-prima", f: "aerea.jpg", a: "Vista aérea da fábrica da Incargel em Itu, com a jazida ao fundo",
-    d: "Jazidas de matérias-primas de altíssima qualidade. O bloco cerâmico nasce de elementos da natureza e não usa aditivos insalubres." },
+    d: "Argila das jazidas que se veem atrás da fábrica. O bloco cerâmico nasce de elementos da natureza e não usa aditivos insalubres." },
   { n: "02", t: "Linha automatizada", f: "robo.jpg", a: "Robô industrial empilhando blocos cerâmicos na linha de produção",
     d: "Produção totalmente automatizada, com tecnologia europeia, e robôs que aumentam a produtividade e a qualidade." },
   { n: "03", t: "Forno túnel", f: "forno.jpg", a: "Vagoneta carregada de blocos na entrada do forno túnel",
-    d: "Forno de última geração com domínio total da temperatura: queima uniforme, padrão dimensional e resistência. A energia vem de sobras da indústria moveleira (serragem)." },
+    d: "A temperatura é controlada ao longo de toda a queima, o que garante queima uniforme, padrão dimensional e resistência. A energia vem de sobras da indústria moveleira (serragem)." },
   { n: "04", t: "Laboratório e normas", f: "controle.jpg", a: "Painel de controle da linha de produção ao lado dos blocos",
-    d: "Laboratório altamente equipado e produtos conforme ABNT NBR 15270 e 15575. Certificada pelo PSQ, o Programa Setorial da Qualidade." },
+    d: "Laboratório próprio para ensaios, e produtos conforme ABNT NBR 15270 e 15575. Certificada pelo PSQ, o Programa Setorial da Qualidade." },
   { n: "05", t: "Entrega na obra", f: "blocos.jpg", a: "Pilhas de blocos cerâmicos prontos para a expedição",
     d: "Pronta entrega e atendimento em todo o Estado de São Paulo, com frete sob consulta. A equipe visita a sua obra." },
 ];
 const recorte = (f: string) => (f === "aerea.jpg" ? " recorte" : "");
 
-// Desktop: a rolagem vertical empurra o trilho para o lado.
+// Desktop: a rolagem vertical empurra o trilho para o lado (versão original da seção).
+// Mais curso de rolagem por etapa e mola mais macia: o trilho anda num ritmo confortável.
 function LinhaDesktop({ ativo }: { ativo: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  // mola leve: o trilho persegue a rolagem em vez de pular junto com cada "tique" da roda do mouse
-  const sp = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.35, restDelta: 0.0005 });
+  const sp = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 0.5, restDelta: 0.0005 });
   const x = useTransform(sp, (v) => `translate3d(${-v * (est.length - 1) * 100}vw,0,0)`);
   const pos = useTransform(sp, [0, 1], ["0%", "100%"]);
   return (
     <div ref={ref} className="linha-wrap">
-      <section className="linha claro">
+      <section className="linha">
         <header className="linha-h">
-          <span className="kick mono">Processo · Itu/SP</span>
           <h2>Do barro à obra</h2>
         </header>
         <motion.div className="trilha" style={ativo ? { transform: x } : undefined}>
           {est.map((e) => (
             <article key={e.n} className="painel">
               <div className="painel-txt">
-                <b className="num mono">{e.n}</b>
+                <b className="num">{e.n}</b>
                 <h3>{e.t}</h3>
                 <p>{e.d}</p>
               </div>
@@ -75,9 +75,8 @@ function LinhaCelular() {
   }
 
   return (
-    <section className="lc claro">
+    <section className="lc">
       <header className="lc-h">
-        <span className="kick mono">Processo · Itu/SP</span>
         <h2>Do barro à obra</h2>
       </header>
 
@@ -95,7 +94,7 @@ function LinhaCelular() {
           <article key={e.n} className={`lc-card${i === idx ? " on" : ""}`} aria-hidden={i !== idx}>
             <figure className={`lc-foto${recorte(e.f)}`}>
               <img src={`/fabrica/${e.f}`} alt={e.a} width={615} height={410} loading={i < 2 ? "eager" : "lazy"} decoding="async" />
-              <b className="mono">{e.n}</b>
+              <b>{e.n}</b>
             </figure>
             <div className="lc-txt">
               <h3>{e.t}</h3>
@@ -106,9 +105,9 @@ function LinhaCelular() {
       </div>
 
       <div className="lc-nav">
-        <button type="button" onClick={() => ir(idx - 1)} disabled={idx === 0} aria-label="Etapa anterior">←</button>
-        <span className="mono"><b>{est[idx].n}</b> / {String(est.length).padStart(2, "0")} · {est[idx].t}</span>
-        <button type="button" onClick={() => ir(idx + 1)} disabled={idx === est.length - 1} aria-label="Próxima etapa">→</button>
+        <button type="button" onClick={() => ir(idx - 1)} disabled={idx === 0} aria-label="Etapa anterior"><IcSeta size={16} dir="esq" /></button>
+        <span><b>{est[idx].n}</b> / {String(est.length).padStart(2, "0")} · {est[idx].t}</span>
+        <button type="button" onClick={() => ir(idx + 1)} disabled={idx === est.length - 1} aria-label="Próxima etapa"><IcSeta size={16} /></button>
       </div>
     </section>
   );

@@ -7,7 +7,7 @@ import Lenis from "lenis";
 export default function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const lenis = new Lenis({ lerp: 0.09 });
+    const lenis = new Lenis({ lerp: 0.14 });
     let raf = 0;
     const loop = (t: number) => { lenis.raf(t); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
@@ -19,7 +19,8 @@ export default function SmoothScroll() {
       const h = a.getAttribute("href") ?? "";
       if (h === "#") { e.preventDefault(); lenis.scrollTo(0); return; }
       const alvo = document.querySelector<HTMLElement>(h);
-      if (alvo) { e.preventDefault(); lenis.scrollTo(alvo, { offset: -8 }); history.replaceState(null, "", h); }
+      // o espaço do topo fixo vem do scroll-margin-top em globals.css ([id])
+      if (alvo) { e.preventDefault(); lenis.scrollTo(alvo); history.replaceState(null, "", h); }
     };
     document.addEventListener("click", onClick);
 
