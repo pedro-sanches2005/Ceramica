@@ -1,5 +1,5 @@
 import Assenta from "./Assenta";
-// Compromissos: afirmações grandes com o visto, selos numa tabela com quem os concede
+// Compromissos: afirmações grandes com o tijolinho, os selos de qualidade com as imagens oficiais
 // e a dica em destaque tipográfico. Nada de papel imitado.
 const dif = [
   ["Não atrasamos", "a sua entrega"],
@@ -9,11 +9,24 @@ const dif = [
   ["Desempenho", "ABNT NBR 15575"],
 ];
 
+// Selos de qualidade: imagens e textos da página "Empresa" do site atual da Incargel
 const selos = [
-  { t: "PSQ", s: "Programa Setorial da Qualidade · Ministério das Cidades" },
-  { t: "Prêmio Quality", s: "Segmento industrial / fabricação de produtos cerâmicos" },
-  { t: "Empresa Amiga da Natureza", s: "Projetos permanentes junto à ACERVIR" },
-  { t: "ABNT NBR 15270 e 15575", s: "Normas técnicas atendidas" },
+  {
+    img: "/selos/acervir-florestal.webp", w: 182, h: 182, alt: "Selo Empresa Amiga da Natureza, ACERVIR Florestal, associado",
+    t: "Selo “Empresa Amiga da Natureza”",
+    d: "A Cerâmica Incargel se preocupa com a natureza e sabe que ter atitudes responsáveis e preocupação ecológica é fundamental. Pensando nisso, a Incargel mantém projetos permanentes junto à ACERVIR, de recuperação ambiental, aprovados pelos órgãos oficiais. Ainda, utiliza em seu forno túnel apenas matéria de reaproveitamento, resultante de sobras da indústria moveleira (serragem), impedindo assim que sejam descartadas inapropriadamente nos lixões comuns, gerando energia térmica e economizando outros combustíveis, como o gás e o óleo.",
+  },
+  {
+    img: "/selos/premio-quality.webp", w: 137, h: 180, alt: "Medalha Prêmio Quality Brasil 2017",
+    t: "Prêmio Quality",
+    d: "Buscando a contínua excelência, a Cerâmica Incargel é certificada pelo Prêmio Quality, no segmento industrial/fabricação de produtos cerâmicos, pela excelente qualidade e tecnologia empregada em seus produtos, pelo respeito para com seus clientes, fornecedores e colaboradores.",
+  },
+  {
+    img: "/selos/anicer.webp", w: 154, h: 102, alt: "Logotipo da ANICER, Associação Nacional da Indústria Cerâmica",
+    t: "Nossas linhas atendem à norma de desempenho ABNT NBR 15575 e ABNT NBR 15270",
+    d: "A ABNT NBR 15270 é a norma técnica de blocos cerâmicos que se dá pela verificação da existência de conformidade na determinação das características dimensionais, geométricas, de identificação (carimbo), físicas e mecânicas dos blocos cerâmicos de vedação.",
+    d2: "A ABNT NBR 15575 estabelece parâmetros técnicos para vários requisitos importantes de uma edificação. Para que uma empresa consiga atingir esses requisitos de desempenho em seus produtos, são realizados diversos ensaios em laboratório; esses resultados são obtidos a partir de determinadas condições de execução do elemento construtivo (parede), as quais, quando reproduzidas em campo, visam atingir o resultado esperado.",
+  },
 ];
 
 export default function Compromissos() {
@@ -33,13 +46,23 @@ export default function Compromissos() {
         ))}
       </Assenta>
 
+      <div className="selos-q">
+        <h3>Selos de qualidade</h3>
+        <ul>
+          {selos.map((x) => (
+            <li key={x.t}>
+              <div className="selo-img"><img src={x.img} alt={x.alt} width={x.w} height={x.h} loading="lazy" decoding="async" /></div>
+              <div>
+                <h4>{x.t}</h4>
+                <p>{x.d}</p>
+                {x.d2 && <p>{x.d2}</p>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <div className="comp-g">
-        <div>
-          <h3>Selos e certificações</h3>
-          <dl className="selos">
-            {selos.map((x) => <div key={x.t}><dt>{x.t}</dt><dd>{x.s}</dd></div>)}
-          </dl>
-        </div>
         <div>
           <h3>Apoio técnico</h3>
           <p>Apoio técnico e treinamento de mão de obra para a sua equipe de obra, desde que os blocos sejam comprados com a Incargel. Blocos modulados permitem saber a quantidade exata de peças da obra.</p>

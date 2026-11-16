@@ -100,6 +100,8 @@ export default function Contato() {
             <a href="#processo">Fábrica</a>
             <a href="#blocos">Blocos</a>
             <a href="#paginacao">Calcular parede</a>
+            <a href="#sistema">Sistema construtivo</a>
+            <a href="#tecnologia">Tecnologia</a>
             <a href="#contato">Contato</a>
           </nav>
           <Cotar />

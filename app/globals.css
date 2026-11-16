@@ -82,9 +82,9 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
 .marca span{display:grid;gap:2px;font:900 1.45rem var(--font-titulo),sans-serif;letter-spacing:.05em}
 .marca small{font:600 .72rem var(--font-texto),sans-serif;letter-spacing:.01em;color:var(--cinza);white-space:nowrap}
 .nav-d{display:flex;gap:clamp(14px,2.6vw,30px);margin-left:auto;margin-right:clamp(10px,2vw,24px)}
-.nav-d a{font:600 .95rem var(--font-texto),sans-serif;text-decoration:none;color:var(--tinta);border-bottom:2px solid transparent;padding-block:4px;transition:border-color .2s}
+.nav-d a{white-space:nowrap;font:600 .95rem var(--font-texto),sans-serif;text-decoration:none;color:var(--tinta);border-bottom:2px solid transparent;padding-block:4px;transition:border-color .2s}
 @media(hover:hover){.nav-d a:hover{border-color:var(--fita)}}
-@media(max-width:760px){.nav-d{display:none}}
+@media(max-width:1140px){.nav-d{display:none}} /* com 6 seções, abaixo de ~1140 px o menu vira o botão ☰ */
 
 /* =========================== primeira tela =========================== */
 .hero{background:var(--barro2);color:var(--cal);padding:0}
@@ -506,7 +506,7 @@ body:has(.menu-cel) .orc-barra{display:none}
 .menu-fones a{display:grid;place-items:center;min-height:44px;border:1.5px solid var(--tinta);font:700 clamp(.82rem,3.6vw,.98rem) var(--font-tipo),monospace;text-decoration:none;color:var(--tinta)}
 .menu-fones a:active{background:var(--tinta);color:var(--cal)}
 .menu-p .bt{width:100%}
-@media(max-width:760px){.menu-b{display:block}.top .bt-sm{margin-left:auto}}
+@media(max-width:1140px){.menu-b{display:block}.top .bt-sm{margin-left:auto}}
 
 /* =========================== simulador no celular: o desenho fica preso no topo =========================== */
 @media(max-width:959px){
@@ -691,3 +691,72 @@ body:has(.menu-cel) .orc-barra{display:none}
 @media(min-width:761px){.top .bt-sm{min-width:150px}}
 /* botões claros (hero, contato, barra): a fiada do hover em barro claro, visível sobre o papel */
 .hero .bt::before,.escuro .bt::before,.orc-barra .bt::before{background-color:var(--brasa2)}
+
+/* =========================== sistema construtivo (desenhos do site atual da Incargel) =========================== */
+.sis{background:var(--papel);border-top:1px solid var(--regua)}
+.sis-h{max-width:72ch;margin-bottom:clamp(28px,4vw,44px)}
+.sis-sub{margin-top:14px;font:700 1.15rem var(--font-texto),sans-serif;color:var(--barro-tx)}
+.sis-frases{list-style:none;padding:0;margin:8px 0 16px;font:800 clamp(1.35rem,2.6vw,2rem)/1.15 var(--font-titulo),sans-serif;text-transform:uppercase}
+.sis-h>p:last-child{line-height:1.6;color:var(--corpo)}
+.sis .aviso{margin-top:14px}
+
+/* galeria: miniaturas que ampliam (fotos da fábrica e desenhos técnicos) */
+.gal{list-style:none;padding:0;display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr))}
+.gal button{display:block;width:100%;padding:0;border:0;background:var(--kraft);cursor:zoom-in;overflow:hidden;aspect-ratio:3/2;position:relative}
+.gal button::after{content:"";position:absolute;inset:0;border:2px solid var(--tinta);pointer-events:none}
+.gal img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+@media(hover:hover){.gal button:hover img{transform:scale(1.04)}}
+.gal-des{grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:clamp(18px,3vw,32px)}
+.gal-des button{aspect-ratio:auto;background:#fff}
+.gal-des button::after{border-width:1px;border-color:var(--regua)}
+.gal-des img{height:auto;object-fit:contain}
+@media(hover:hover){.gal-des button:hover img{transform:scale(1.02)}}
+.gal-leg{margin-top:10px;font:600 .95rem var(--font-texto),sans-serif;color:var(--cinza)}
+.gal-mais{margin-top:22px}
+/* tela cheia */
+.gal-dlg{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:clamp(56px,6vw,72px) clamp(12px,6vw,88px);border:0;background:transparent;color:var(--cal)}
+.gal-dlg[open]{display:grid;place-items:center}
+.gal-dlg::backdrop{background:#1C1A17ee}
+.gal-dlg figure{margin:0;display:grid;gap:12px;max-width:min(1240px,100%)}
+.gal-dlg img{display:block;max-width:100%;max-height:calc(100dvh - 160px);margin:0 auto;object-fit:contain}
+.gal-dlg figcaption{display:flex;justify-content:space-between;gap:16px;font:600 .95rem var(--font-texto),sans-serif;color:var(--kraft)}
+.gal-x,.gal-n{position:fixed;display:grid;place-items:center;width:48px;height:48px;background:var(--tinta);color:var(--cal);border:2px solid var(--cal);cursor:pointer}
+.gal-x{top:12px;right:12px}
+.gal-n{top:50%;transform:translateY(-50%)}.gal-n.ant{left:12px}.gal-n.prx{right:12px}
+@media(hover:hover){.gal-x:hover,.gal-n:hover{background:var(--cal);color:var(--tinta)}}
+.gal-dlg :focus-visible{outline-color:var(--fita-cl)}
+
+/* =========================== tecnologia (texto, fotos e galeria do site atual) =========================== */
+.tec{background:var(--kraft)}
+.tec-in{display:grid;gap:clamp(24px,4vw,56px);align-items:center}
+.tec-in+.tec-in{margin-top:clamp(40px,6vw,72px)}
+@media(min-width:900px){.tec-in{grid-template-columns:1.1fr .9fr}.tec-in.inv{grid-template-columns:.9fr 1.1fr}}
+.tec-txt h3{font-size:clamp(1.3rem,2.3vw,1.75rem);margin:14px 0 14px}
+.tec-in.inv .tec-txt h3{margin-top:0}
+.tec-txt p{line-height:1.6;color:var(--corpo);max-width:62ch}
+.tec-l{margin-top:14px;font-weight:700;color:var(--tinta)!important}
+.tec-foto{margin:0;position:relative;aspect-ratio:538/409;overflow:hidden;background:var(--cal)}
+.tec-foto::after{content:"";position:absolute;inset:0;border:2px solid var(--tinta);pointer-events:none}
+.tec-foto img{display:block;width:100%;height:100%;object-fit:cover}
+.tec-lista{list-style:none;padding:0;border-top:2px solid var(--tinta)}
+.tec-lista li{padding:11px 0;border-bottom:1px solid var(--regua);line-height:1.5;color:var(--corpo)}
+.tec .gal{margin-top:clamp(40px,6vw,72px)}
+
+/* =========================== selos de qualidade (imagens oficiais) =========================== */
+.selos-q{margin-top:clamp(44px,6vw,72px)}
+.selos-q h3{margin-bottom:6px}
+.selos-q ul{list-style:none;padding:0}
+.selos-q li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:start;padding:clamp(20px,3vw,30px) 0;border-bottom:1px solid var(--regua)}
+.selos-q li:first-child{border-top:2px solid var(--tinta)}
+.selo-img{display:grid;place-items:center;height:150px}
+.selo-img img{max-width:140px;max-height:140px;width:auto;height:auto;object-fit:contain}
+.selos-q h4{font:700 1.12rem/1.3 var(--font-texto),sans-serif;color:var(--barro-tx);margin-bottom:8px;text-wrap:balance}
+.selos-q p{line-height:1.6;color:var(--corpo);max-width:78ch}
+.selos-q p+p{margin-top:10px}
+@media(max-width:600px){
+  .selos-q li{grid-template-columns:1fr}
+  .selo-img{justify-items:start;height:auto}
+  .selo-img img{max-width:110px;max-height:110px}
+}
+.selo-img img{mix-blend-mode:multiply} /* o fundo branco das imagens originais some no papel */
+@media(max-width:600px){.gal:not(.gal-des){grid-template-columns:1fr 1fr;gap:8px}} /* celular: galeria em duas colunas */

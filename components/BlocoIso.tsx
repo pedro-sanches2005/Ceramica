@@ -21,7 +21,8 @@ export default function BlocoIso({ dim, cel, furo = "h", forma = "bloco", baixa 
   const [w, h, l] = dim;
   const reduz = useReducedMotion();
   const animado = ativo !== undefined;
-  const interno = useMotionValue(animado && !reduz ? 0 : 1);
+  // começa igual no servidor e no navegador (o servidor não sabe do "reduzir movimento"); o efeito abaixo ajusta
+  const interno = useMotionValue(animado ? 0 : 1);
   useEffect(() => {
     if (!animado) return;
     if (reduz) { interno.set(1); return; }

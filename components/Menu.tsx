@@ -19,6 +19,10 @@ const links: { h: string; t: string; mini: ReactNode }[] = [
   { h: "#blocos", t: "Blocos", mini: <Ic><path {...tr} d="M4 11l9-5 11 5v10l-11 5-9-5V11Z" /><path {...tr} d="M4 11l9 5 11-5M13 16v10" /><path {...tr} d="M9 10.6l2.5-1.4 2.5 1.4-2.5 1.4ZM15 9l2.5-1.4 2.5 1.4-2.5 1.4Z" /></Ic> },
   // parede em amarração com a régua de medida embaixo
   { h: "#paginacao", t: "Calcular parede", mini: <Ic><path {...tr} d="M3 4h22v15H3Z" /><path {...tr} d="M3 9h22M3 14h22M10 4v5M18 4v5M6 9v5M14 9v5M22 9v5M10 14v5M18 14v5" /><path {...tr} d="M3 23h22M3 21.5v3M25 21.5v3" /></Ic> },
+  // planta da casa com os blocos da primeira fiada marcados nos cantos (o desenho da modulação)
+  { h: "#sistema", t: "Sistema construtivo", mini: <Ic><path {...tr} d="M4 4h20v20H4Z" /><path {...tr} d="M4 13h9M13 4v9M17 13v11" /><path {...tr} d="M4 4h3v3H4ZM21 4h3v3h-3ZM4 21h3v3H4ZM21 21h3v3h-3ZM11.5 11.5h3v3h-3Z" /></Ic> },
+  // braço do robô da linha, com a garra segurando um bloco
+  { h: "#tecnologia", t: "Tecnologia", mini: <Ic><path {...tr} d="M5 24h10M10 24v-5" /><path {...tr} d="M10 19l4-8 8 2" /><path {...tr} d="M22 13v4M20 17h6v5h-6Z" /></Ic> },
   // balão do WhatsApp, o mesmo desenho dos botões de cotação
   { h: "#contato", t: "Contato", mini: <IcWhats size={26} /> },
 ];

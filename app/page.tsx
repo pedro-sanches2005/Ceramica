@@ -3,6 +3,8 @@ import Linha from "@/components/Linha";
 import Catalogo from "@/components/Catalogo";
 import Modulador from "@/components/Modulador";
 import Impacto from "@/components/Impacto";
+import Sistema from "@/components/Sistema";
+import Tecnologia from "@/components/Tecnologia";
 import Compromissos from "@/components/Compromissos";
 import Contato from "@/components/Contato";
 import Marca from "@/components/Marca";
@@ -26,6 +28,8 @@ export default function Home() {
           <a href="#processo">Fábrica</a>
           <a href="#blocos">Blocos</a>
           <a href="#paginacao">Calcular parede</a>
+          <a href="#sistema">Sistema construtivo</a>
+          <a href="#tecnologia">Tecnologia</a>
           <a href="#contato">Contato</a>
         </nav>
         <Cotar className="bt bt-sm" curto icone={16} />
@@ -35,7 +39,9 @@ export default function Home() {
       <Linha />
       <Catalogo />
       <Modulador />
+      <Sistema />
       <Impacto />
+      <Tecnologia />
       <Compromissos />
       <Contato />
       <Orcamento />
