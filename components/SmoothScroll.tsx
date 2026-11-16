@@ -8,6 +8,8 @@ export default function SmoothScroll() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const lenis = new Lenis({ lerp: 0.14 });
+    // outros componentes (ex.: "Calcular parede com esta linha") rolam com a mesma inércia
+    (window as Window & { __lenis?: Lenis }).__lenis = lenis;
     let raf = 0;
     const loop = (t: number) => { lenis.raf(t); raf = requestAnimationFrame(loop); };
     raf = requestAnimationFrame(loop);
@@ -24,7 +26,7 @@ export default function SmoothScroll() {
     };
     document.addEventListener("click", onClick);
 
-    return () => { cancelAnimationFrame(raf); document.removeEventListener("click", onClick); lenis.destroy(); };
+    return () => { cancelAnimationFrame(raf); document.removeEventListener("click", onClick); lenis.destroy(); delete (window as Window & { __lenis?: Lenis }).__lenis; };
   }, []);
   return null;
 }

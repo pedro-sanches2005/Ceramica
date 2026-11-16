@@ -1,4 +1,4 @@
-import { Mark, MarkerText } from "./MarkerText";
+import Assenta from "./Assenta";
 // Compromissos: afirmações grandes com o visto, selos numa tabela com quem os concede
 // e a dica em destaque tipográfico. Nada de papel imitado.
 const dif = [
@@ -19,17 +19,19 @@ const selos = [
 export default function Compromissos() {
   return (
     <section className="comp">
-      <MarkerText as="h2">O que você pode <Mark type="underline" color="var(--barro2)">cobrar</Mark> da gente.</MarkerText>
-      <ul className="confere">
-        {dif.map(([a, b]) => (
-          <li key={a}>
-            <svg className="visto" viewBox="0 0 24 24" width="26" height="26" aria-hidden>
-              <path d="M3.5 12.5l5.5 5.5L20.5 6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" />
+      <h2>O que você pode cobrar da gente.</h2>
+      <Assenta className="confere">
+        {dif.map(([a, b], i) => (
+          <li key={a} style={{ "--i": i } as React.CSSProperties}>
+            {/* no lugar do ✓: a face do bloco, como peça conferida na carga */}
+            <svg className="visto" viewBox="0 0 34 20" width="46" height="27" aria-hidden>
+              <rect x="1" y="1" width="32" height="18" rx="1.5" fill="var(--brasa)" stroke="var(--tinta)" strokeWidth="2" />
+              {[5, 12.5, 20, 27.5].map((x) => <rect key={x} x={x - 2.2} y="5" width="4.4" height="10" rx=".8" fill="var(--tinta)" opacity=".75" />)}
             </svg>
             <span>{a} {b}</span>
           </li>
         ))}
-      </ul>
+      </Assenta>
 
       <div className="comp-g">
         <div>

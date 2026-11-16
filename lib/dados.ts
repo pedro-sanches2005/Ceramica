@@ -6,6 +6,12 @@ export const FONES = [
   { label: "(11) 98383-1253", tel: "+5511983831253" },
 ];
 export const EMAIL = "falecom@incargel.com.br";
+// Endereço público do site (Google, prévia do link no WhatsApp, sitemap).
+// 1º NEXT_PUBLIC_SITE_URL, se definido na Vercel (ex.: https://incargel.com.br quando o domínio for trocado);
+// 2º o endereço de produção que a própria Vercel informa (ex.: ceramica.vercel.app), para a prévia funcionar no teste;
+// 3º o domínio da Incargel.
+const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+export const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? (vercel ? `https://${vercel}` : "https://incargel.com.br")).replace(/\/$/, "");
 export const MAPS = "https://www.google.com/maps?q=-23.27898,-47.34078";
 export const wa = (t?: string) => `https://wa.me/${WHATS}${t ? `?text=${encodeURIComponent(t)}` : ""}`;
 
@@ -106,11 +112,29 @@ export const fmt = (n: number) => String(n).replace(".", ",");
 export const fotoPeca = (img: string) => `/pecas/${img}.webp`;
 // Furo vertical (estruturais e a vedação 9/39 "furo vertical") ou horizontal (vedação comum): muda o desenho técnico.
 export const furoDe = (i: { id: string; fam: Item["fam"] }): "v" | "h" => (i.fam === "Estrutural" || i.id === "v939" ? "v" : "h");
+// "Carga aprox." da ficha em número (ex.: "3.000 pçs" → 3000); nem toda peça tem
+export const cargaDe = (specs: [string, string][]) => { const v = specs.find(([k]) => k.startsWith("Carga"))?.[1]; return v ? Number(v.replace(/\D/g, "")) || undefined : undefined; };
 export const totalPecas = itens.reduce((s, i) => s + i.pecas.length, 0);
 
-// Linhas que podem ser "paginadas": todas têm meio bloco e altura 19 cm.
-// l = comprimento do inteiro, meio = comprimento do meio bloco, u = tem canaleta U na linha.
-export type Modulo = { id: string; fam: "Estrutural" | "Vedação"; nome: string; w: number; l: number; meio: number; u: boolean };
+// Como desenhar cada peça da família no desenho técnico, a partir da medida escrita na ficha.
+// A ficha usa largura × altura × comprimento, com três exceções de formato:
+//   canaleta J "07 × 14 × 19 × 29": parede baixa (7) × largura × altura × comprimento
+//   compensadora "07 × 14 × 29": é uma canaleta rasa: altura (7) × largura × comprimento
+//   seccionável "14 × 19 × 4": placa fina de 4 cm com dois furos, desenhada de ponta
+export type Desenho = { dim: [number, number, number]; cel: [number, number]; furo: "v" | "h"; forma: "bloco" | "u" | "j"; baixa?: number };
+export function desenhoPeca(it: Item, p: Peca): Desenho {
+  const n = p.dim.split("×").map((x) => Number(x.trim().replace(",", ".")));
+  const tipo = p.img.slice(it.id.length + 1);
+  if (tipo === "canaleta-j") return { dim: [n[1], n[2], n[3]], cel: it.cel, furo: "h", forma: "j", baixa: n[0] };
+  if (tipo === "compensadora") return { dim: [n[1], n[0], n[2]], cel: it.cel, furo: "h", forma: "u" };
+  if (tipo === "canaleta-u") return { dim: [n[0], n[1], n[2]], cel: it.cel, furo: "h", forma: "u" };
+  if (tipo === "seccionavel") return { dim: [n[2], n[1], n[0]], cel: [1, 2], furo: "h", forma: "bloco" };
+  return { dim: [n[0], n[1], n[2]], cel: it.cel, furo: tipo === "hidraulico" ? "v" : furoDe(it), forma: "bloco" };
+}
+
+// Linhas que podem ser "paginadas": todas têm meio bloco. Altura 19 cm, exceto a 11,5 × 24 (14 cm).
+// l = comprimento do inteiro, meio = comprimento do meio bloco, u = tem canaleta U na linha, h = altura do bloco.
+export type Modulo = { id: string; fam: "Estrutural" | "Vedação"; nome: string; w: number; l: number; meio: number; u: boolean; h?: number };
 export const modulos: Modulo[] = [
   { id: "e1429", fam: "Estrutural", nome: "Estrutural 14/29", w: 14, l: 29, meio: 14, u: true },
   { id: "e1439", fam: "Estrutural", nome: "Estrutural 14/39", w: 14, l: 39, meio: 19, u: true },
@@ -119,6 +143,7 @@ export const modulos: Modulo[] = [
   { id: "v939", fam: "Vedação", nome: "Vedação 9/39", w: 9, l: 39, meio: 19, u: true },
   { id: "v929", fam: "Vedação", nome: "Vedação 9", w: 9, l: 29, meio: 14, u: false },
   { id: "v11529", fam: "Vedação", nome: "Vedação 11,5 × 29", w: 11.5, l: 29, meio: 14, u: true },
+  { id: "v11524", fam: "Vedação", nome: "Vedação 11,5 × 24", w: 11.5, l: 24, meio: 14, u: true, h: 14 },
   { id: "v1429", fam: "Vedação", nome: "Vedação 14", w: 14, l: 29, meio: 14, u: true },
   { id: "v1929", fam: "Vedação", nome: "Vedação 19", w: 19, l: 29, meio: 14, u: true },
 ];

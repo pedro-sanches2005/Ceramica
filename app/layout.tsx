@@ -3,6 +3,7 @@ import { Archivo, Big_Shoulders, Big_Shoulders_Stencil, Courier_Prime } from "ne
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import RegistraApp from "@/components/RegistraApp";
+import { SITE } from "@/lib/dados";
 
 // Big Shoulders: títulos condensados, como marcação de carga. Stencil: a palavra estampada a spray.
 // Courier Prime: os valores datilografados na etiqueta. Archivo: o texto corrido.
@@ -19,11 +20,27 @@ const telas: [number, number, number][] = [
   [744, 1133, 2], [820, 1180, 2], [834, 1194, 2], [1024, 1366, 2],
 ];
 
+const desc = "Blocos cerâmicos estruturais e de vedação fabricados em Itu/SP, com entrega em todo o Estado de São Paulo. ABNT NBR 15270 e 15575.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE),
+  alternates: { canonical: "/" },
+  // prévia do link no WhatsApp, Google e redes (public/og.png, 1200 × 630)
+  openGraph: {
+    type: "website", locale: "pt_BR", url: "/", siteName: "Incargel",
+    title: "Incargel | Bloco que segura a obra",
+    description: desc,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Incargel: bloco que segura a obra. Blocos cerâmicos estruturais e de vedação em Itu/SP" }],
+  },
+  twitter: { card: "summary_large_image", title: "Incargel | Bloco que segura a obra", description: desc, images: ["/og.png"] },
   title: "Incargel | Blocos cerâmicos estruturais e de vedação em Itu/SP",
-  description: "Blocos cerâmicos estruturais e de vedação fabricados em Itu/SP, com entrega em todo o Estado de São Paulo. ABNT NBR 15270 e 15575.",
+  description: desc,
   applicationName: "Incargel",
-  icons: { apple: [{ url: "/app/apple-touch-icon.png", sizes: "180x180" }] },
+  // ícone da aba (svg nítido + ico para navegadores antigos) e o do iPhone; declarar "icons" desliga o automático do Next
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/favicon.ico", sizes: "16x16 32x32 48x48" }],
+    apple: [{ url: "/app/apple-touch-icon.png", sizes: "180x180" }],
+  },
   // iPhone: abre em tela cheia pela Tela de Início, com a tela de abertura certa para cada aparelho
   appleWebApp: {
     capable: true,

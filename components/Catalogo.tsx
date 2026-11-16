@@ -6,7 +6,8 @@ import Familia from "./Familia";
 import Qtd from "./Qtd";
 import { Mark, MarkerText } from "./MarkerText";
 import { IcSeta } from "./Icone";
-import { fmt, fotoPeca, furoDe, itens, totalPecas, type Item } from "@/lib/dados";
+import { cargaDe, fmt, fotoPeca, furoDe, itens, totalPecas, type Item } from "@/lib/dados";
+import { calcularComLinha } from "@/lib/ir";
 
 type Fam = "Estrutural" | "Vedação";
 
@@ -40,21 +41,24 @@ function Card({ it, n, onFamilia }: { it: Item; n: number; onFamilia: (it: Item)
             <span className="card-fam-t">+{extras.length} peças da linha</span>
             <IcSeta className="card-fam-s" />
           </button>
-          <div className="card-q"><Qtd item={item} /></div>
+          <div className="card-q"><Qtd item={item} carga={cargaDe(principal.specs)} /></div>
           <button type="button" className="card-z" onClick={() => setVirado(true)} aria-label={`Ver medidas do bloco ${nome}`}>Ver medidas</button>
         </div>
 
         {/* verso: desenho técnico com as cotas */}
         <div className="face verso" inert={!virado}>
           <header className="card-t"><b className="mono">Linha {it.linha}</b><span>Medidas em cm</span></header>
-          <div className="card-iso"><BlocoIso dim={it.dim} cel={it.cel} furo={furoDe(it)} /></div>
+          <div className="card-iso"><BlocoIso dim={it.dim} cel={it.cel} furo={furoDe(it)} ativo={virado} /></div>
           <dl className="card-s">
             {it.specs.map(([k, v]) => (<div key={k}><dt>{k}</dt><dd className="mono">{v}</dd></div>))}
           </dl>
           <div className="card-a">
             <button type="button" className="bt bt-sm ln" onClick={() => setVirado(false)}><IcSeta dir="esq" />Ver bloco</button>
-            <button type="button" className="card-z" onClick={() => onFamilia(it)}>Família ({it.pecas.length})</button>
+            <button type="button" className="card-z" onClick={() => onFamilia(it)}>Ver as {it.pecas.length} peças</button>
           </div>
+          <button type="button" className="card-calc" onClick={() => calcularComLinha(it.id)}>
+            Calcular parede com esta linha <IcSeta size={14} />
+          </button>
         </div>
       </div>
     </motion.article>
@@ -115,7 +119,8 @@ export default function Catalogo() {
       <div className="cards-nav" aria-hidden>
         <span className="mono"><b>{String(idx + 1).padStart(2, "0")}</b> / {String(lista.length).padStart(2, "0")}</span>
         <span className="cards-dots">
-          {lista.map((it, i) => <i key={it.id} className={i === idx ? "on" : ""} onClick={() => ir(i)} />)}
+          {/* atalho para o toque (o arraste continua sendo o caminho principal); fora da ordem do Tab */}
+          {lista.map((it, i) => <button type="button" tabIndex={-1} key={it.id} className={i === idx ? "on" : ""} onClick={() => ir(i)} />)}
         </span>
         <span className={`cards-dica${mexeu ? " some" : ""}`}>Arraste <IcSeta size={12} /></span>
       </div>

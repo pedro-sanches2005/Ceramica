@@ -27,6 +27,15 @@ export function IcMenos({ size = 16, className }: P) {
   );
 }
 
+// Lixeira: excluir o produto do orçamento (mesmo traço quadrado do mais e menos).
+export function IcLixo({ size = 16, className }: P) {
+  return (
+    <svg className={`ic${className ? ` ${className}` : ""}`} viewBox="0 0 16 16" width={size} height={size} aria-hidden fill="none">
+      <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.8 6.5v4.5M9.2 6.5v4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" />
+    </svg>
+  );
+}
+
 // Seta reta; "dir" gira o mesmo desenho.
 export function IcSeta({ size = 14, dir = "dir", className }: P & { dir?: "dir" | "esq" | "cima" | "baixo" }) {
   const rot = { dir: 0, baixo: 90, esq: 180, cima: 270 }[dir];

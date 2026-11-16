@@ -7,12 +7,11 @@ import Compromissos from "@/components/Compromissos";
 import Contato from "@/components/Contato";
 import Marca from "@/components/Marca";
 import Menu from "@/components/Menu";
-import { IcWhats } from "@/components/Icone";
-import Rola from "@/components/Rola";
-import { wa } from "@/lib/dados";
+import Cotar from "@/components/Cotar";
 import { OrcamentoProvider } from "@/lib/orcamento";
 import Orcamento from "@/components/Orcamento";
 import Privacidade from "@/components/Privacidade";
+import FichaGoogle from "@/components/FichaGoogle";
 
 export default function Home() {
   return (
@@ -29,8 +28,7 @@ export default function Home() {
           <a href="#paginacao">Calcular parede</a>
           <a href="#contato">Contato</a>
         </nav>
-        <a className="bt bt-sm" target="_blank" rel="noopener noreferrer" aria-label="Cotar no WhatsApp"
-          href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}><Rola><IcWhats size={16} />Cotar</Rola></a>
+        <Cotar className="bt bt-sm" curto icone={16} />
         <Menu />
       </header>
       <Hero />
@@ -42,6 +40,7 @@ export default function Home() {
       <Contato />
       <Orcamento />
       <Privacidade />
+      <FichaGoogle />
     </main>
     </OrcamentoProvider>
   );

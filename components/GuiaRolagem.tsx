@@ -9,7 +9,8 @@ export default function GuiaRolagem({ p, texto, passos }: { p: MotionValue<numbe
   const [passo, setPasso] = useState(1);
   useMotionValueEvent(p, "change", (v) => {
     setFim(v > 0.985);
-    if (passos) setPasso(Math.min(passos, Math.round(v * (passos - 1)) + 1));
+    // mesma regra do trilho: a etapa conta quando o tijolinho chega no marco
+    if (passos) setPasso(Math.min(passos, Math.floor(v * (passos - 1) + 0.06) + 1));
   });
   const traco = useTransform(p, (v) => 75.4 * (1 - Math.min(1, Math.max(0, v))));
   return (

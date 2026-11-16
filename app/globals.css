@@ -17,6 +17,7 @@
   --corpo:#2C2925;   /* texto corrido */
   --fita:#2F5D9E;    /* o único acento: links, foco, vistos */
   --fita-cl:#8FB1E8; /* a mesma fita, clareada para sublinhar sobre chão escuro */
+  --fita-kr:#244A80; /* a mesma fita, escurecida para texto direto sobre o kraft (5:1) */
   --corte:#C8322B;   /* peça cortada, e só isso */
   --regua:#1C1A1733;
   /* desenho do bloco (BlocoIso) e logo (Marca) */
@@ -49,29 +50,24 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
 .bt{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 24px;
   background:var(--tinta);color:var(--cal);border:2px solid var(--tinta);
   font:800 1.12rem var(--font-titulo),sans-serif;letter-spacing:.07em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:color .25s,transform .15s}
-.bt::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--fita);transform:translateY(101%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
-.bt.ln{background:transparent;color:var(--tinta)}.bt.ln::before{background:var(--tinta)}
+/* hover: os blocos são assentados um a um da esquerda para a direita, como uma fiada (5 blocos, com as juntas) */
+.bt::before{content:"";position:absolute;inset:0;z-index:-1;background-color:var(--fita);background-image:linear-gradient(90deg,transparent calc(20% - 1.5px),#1C1A1730 calc(20% - 1.5px) 20%,transparent 20% calc(40% - 1.5px),#1C1A1730 calc(40% - 1.5px) 40%,transparent 40% calc(60% - 1.5px),#1C1A1730 calc(60% - 1.5px) 60%,transparent 60% calc(80% - 1.5px),#1C1A1730 calc(80% - 1.5px) 80%,transparent 80%);
+  transform:scaleX(0);transform-origin:0 50%;transition:transform .4s steps(5,end)}
+.bt.ln{background:transparent;color:var(--tinta)}.bt.ln::before{background-color:var(--tinta)}
 @media(hover:hover){.bt:hover::before{transform:none}.bt:hover{border-color:var(--fita)}.bt.ln:hover{color:var(--cal);border-color:var(--tinta)}}
 .bt-sm{padding:8px 14px;font-size:.98rem;gap:7px;white-space:nowrap}
 :focus-visible{outline:3px solid var(--fita);outline-offset:3px}
 /* sobre chão escuro (topo, comparação, contato) o botão vira papel */
 .hero .bt,.escuro .bt{background:var(--cal);color:var(--tinta);border-color:var(--cal)}
-.hero .bt::before,.escuro .bt::before{background:var(--kraft)}
+.hero .bt::before,.escuro .bt::before{background-color:var(--kraft)}
 .hero .bt.ln,.escuro .bt.ln{background:transparent;color:var(--cal)}
-.hero .bt.ln::before,.escuro .bt.ln::before{background:var(--cal)}
+.hero .bt.ln::before,.escuro .bt.ln::before{background-color:var(--cal)}
 @media(hover:hover){.hero .bt:hover,.escuro .bt:hover{border-color:var(--kraft)}.hero .bt.ln:hover,.escuro .bt.ln:hover{color:var(--tinta);border-color:var(--cal)}}
 .hero :focus-visible,.escuro :focus-visible,.imp :focus-visible{outline-color:var(--fita-cl)}
 .cta{display:flex;flex-wrap:wrap;gap:10px}
-/* rótulo que rola no hover/foco (Slide Text Button do KokonutUI): mesma frase, a cópia de baixo sobe */
-.rola{display:grid;justify-items:center;transition:transform .22s cubic-bezier(.77,0,.175,1)}
-.rola>span{grid-area:1/1;display:inline-flex;align-items:center;gap:inherit;transition:opacity .2s}
-.rola{gap:inherit}
-.rola-b{transform:translateY(100%);opacity:0}
-.bt:hover .rola,.bt:focus-visible .rola{transform:translateY(-100%)}
-.bt:hover .rola-a,.bt:focus-visible .rola-a{opacity:0}
-.bt:hover .rola-b,.bt:focus-visible .rola-b{opacity:1}
+.rola{display:inline-flex;align-items:center;gap:inherit}
 .bt:active{transform:scale(.97)}
-@media (prefers-reduced-motion:reduce){.rola,.rola>span{transition:none}.bt:active{transform:none}}
+@media (prefers-reduced-motion:reduce){.bt:active{transform:none}}
 .nota-cot{font-size:.88rem;line-height:1.5;color:var(--corpo);max-width:56ch}
 .nota-cot a{color:var(--tinta);font-weight:600;text-decoration:none;border-bottom:2px solid var(--fita);white-space:nowrap}
 .hero .nota-cot{color:var(--cal)}
@@ -92,11 +88,18 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
 
 /* =========================== primeira tela =========================== */
 .hero{background:var(--barro2);color:var(--cal);padding:0}
-/* Topo Background (KokonutUI): curvas de nível da jazida desenhadas num canvas atrás do conteúdo */
-.topo{position:relative;overflow:hidden}
-.topo-mapa{position:absolute;inset:0;pointer-events:none}
-.topo-mapa canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .6s ease-out;color:var(--kraft);
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 14%,#000 86%,transparent)}
+/* fundo do hero: parede em amarração (blocos 29 × 19, a mesma da calculadora) em traço kraft;
+   as fiadas se assentam de baixo para cima ao abrir (40 px por fiada), uma vez só */
+.hero-topo{position:relative;overflow:hidden}
+.fundo-parede{position:absolute;inset:0;pointer-events:none;color:var(--kraft);opacity:.2;
+  -webkit-mask-image:linear-gradient(100deg,#0004 0%,#000 55%);mask-image:linear-gradient(100deg,#0004 0%,#000 55%)}
+/* as fiadas aparecem de baixo para cima: uma cortina da cor do barro encolhe por cima da parede, aos saltos de uma fiada.
+   É só transform (a placa de vídeo faz); recortar a parede com clip-path repintava a tela inteira a cada passo. */
+.hero-topo::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:var(--barro2);transform-origin:50% 0;
+  animation:assenta 1.5s steps(24,end) .1s both}
+@keyframes assenta{from{transform:scaleY(1)}to{transform:scaleY(0)}}
+@media(prefers-reduced-motion:reduce){.hero-topo::after{animation:none;display:none}}
+@media(max-width:760px){.fundo-parede{opacity:.13}} /* no celular o texto ocupa a largura toda: parede mais suave */
 .hero-topo{min-height:min(100svh,960px);display:flex;align-items:center;padding:calc(60px + clamp(32px,5vw,72px)) clamp(16px,4vw,56px) clamp(56px,7vw,96px)}
 .hero-in{position:relative;z-index:1;width:100%;max-width:1340px;margin:0 auto;display:grid;gap:clamp(28px,4vw,56px)}
 @media(min-width:900px){.hero-in{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);align-items:center}}
@@ -115,14 +118,14 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
 
 /* =========================== do barro à obra: trilho horizontal preso (versão original) =========================== */
 /* mais curso de rolagem por etapa que antes (520svh): o trilho anda num ritmo confortável */
-.linha-wrap{height:520svh}
+.linha-wrap{height:300svh} /* ~2 telas de rolagem para as 5 etapas (antes ~5): o catálogo chega mais cedo */
 .linha{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;padding:60px 0 0;background:var(--cal);color:var(--tinta)}
 .linha-h{padding:clamp(18px,4svh,44px) clamp(16px,4vw,56px) 0}
 .linha h2{font-size:clamp(2.2rem,min(6vw,9svh),4.6rem)}
 .trilha{flex:1;display:flex;width:max-content;min-height:0;will-change:transform;backface-visibility:hidden}
 .painel{flex:0 0 100vw;width:100vw;max-width:100vw;padding:0 clamp(16px,4vw,56px);display:grid;align-content:center;gap:clamp(12px,2.4svh,28px)}
 .painel-txt{display:grid;gap:clamp(8px,1.4svh,14px);align-content:center}
-.painel .num{font:800 clamp(3.6rem,min(18vw,15svh),11rem)/.85 var(--font-titulo),sans-serif;color:transparent;-webkit-text-stroke:2px var(--tinta)}
+.painel .num{font:800 clamp(3.6rem,min(18vw,15svh),11rem)/.85 var(--font-titulo),sans-serif;color:var(--tinta)} /* número cheio, como estampado na carga */
 .painel h3{font-size:clamp(1.6rem,3.6vw,2.6rem)}
 .painel p{max-width:46ch;line-height:1.55;font-size:clamp(.98rem,1.6vw,1.15rem);color:var(--corpo)}
 /* a foto é dimensionada pela altura livre da tela, então nunca passa por baixo do trilho; nunca maior que 615px */
@@ -136,8 +139,11 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
   .foto{height:min(calc(100svh - 300px),36vw,410px);justify-self:end}
 }
 .rail{position:relative;height:2px;background:var(--tinta);margin:0 clamp(16px,4vw,56px) 74px}
-.rail i{position:absolute;top:-6px;width:2px;height:14px;background:var(--tinta)}
-.peca{position:absolute;top:-9px;width:26px;height:14px;background:var(--brasa);border:2px solid var(--tinta);transform:translateX(-50%)}
+.rail>button{position:absolute;top:-6px;width:2px;height:14px;padding:0;border:0;cursor:pointer;background:var(--tinta);transform-origin:50% 100%;transition:background .3s,transform .3s cubic-bezier(.2,.8,.2,1)}
+.rail>button.on{background:var(--brasa);transform:scaleY(1.35)} /* marcos já alcançados ficam da cor do tijolo */
+/* o tijolinho anda assentado sobre a linha; em cima de um marco, a etapa dele aparece */
+.peca{position:absolute;top:-26px;width:46px;height:27px;transform:translateX(-50%);z-index:1}
+.peca svg{display:block}
 /* guia da cena: anel de progresso + instrução; some quando a cena termina */
 .guia{position:absolute;left:50%;bottom:max(16px,env(safe-area-inset-bottom));z-index:5;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
   padding:7px 16px 7px 8px;background:var(--tinta);color:var(--cal);border-radius:999px;white-space:nowrap;
@@ -179,7 +185,7 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
   .lc-foto.recorte img,.lc-card.on .lc-foto.recorte img{object-position:100% 0;transform-origin:100% 0;transform:scale(1.25)}
   /* número vazado sobre a foto, com um degradê para leitura */
   .lc-foto::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(transparent,#1C1A17d0);pointer-events:none}
-  .lc-foto b{position:absolute;left:12px;bottom:4px;z-index:1;font:800 4.2rem/1 var(--font-titulo),sans-serif;color:transparent;-webkit-text-stroke:1.5px var(--cal);
+  .lc-foto b{position:absolute;left:12px;bottom:4px;z-index:1;font:800 4.2rem/1 var(--font-titulo),sans-serif;color:var(--cal);text-shadow:0 2px 14px #1C1A1799;
     transform:translateY(16px);opacity:0;transition:transform .6s .15s cubic-bezier(.2,.8,.2,1),opacity .6s .15s}
   .lc-card.on .lc-foto b{transform:none;opacity:1}
   .lc-txt{padding:16px 2px 0}
@@ -302,7 +308,7 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
   box-shadow:0 10px 26px #1C1A1755}
 .orc-barra p{font-size:.95rem;line-height:1.3;min-width:0}.orc-barra b{font-weight:700}
 .orc-barra .bt{background:var(--cal);color:var(--tinta);border-color:var(--cal);flex:none}
-.orc-barra .bt::before{background:var(--kraft)}
+.orc-barra .bt::before{background-color:var(--kraft)}
 /* painel lateral do orçamento */
 .orc-ov{position:fixed;inset:0;z-index:110;background:#1C1A17aa;display:flex;justify-content:flex-end}
 .orc{width:min(480px,100%);height:100%;display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;background:var(--cal);color:var(--tinta);border-left:2px solid var(--tinta)}
@@ -348,9 +354,10 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
   .cards-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 0}
   .cards-nav>.mono{font-size:.92rem;min-width:58px}.cards-nav b{font-weight:700}
   .cards-dots{display:flex;gap:6px;align-items:center}
-  .cards-dots i{width:9px;height:9px;background:#1C1A1740;transition:width .3s cubic-bezier(.2,.8,.2,1),background .3s;cursor:pointer}
-  .cards-dots i.on{width:26px;background:var(--tinta)}
-  .cards-dica{display:inline-flex;align-items:center;justify-content:flex-end;gap:5px;font-size:.88rem;font-weight:600;color:var(--fita);min-width:58px;transition:opacity .4s}
+  .cards-dots button{position:relative;width:9px;height:9px;padding:0;border:0;background:#1C1A1740;transition:width .3s cubic-bezier(.2,.8,.2,1),background .3s;cursor:pointer}
+  .cards-dots button::after{content:"";position:absolute;inset:-17px -3px} /* área de toque de 44 px, mesmo desenho */
+  .cards-dots button.on{width:26px;background:var(--tinta)}
+  .cards-dica{display:inline-flex;align-items:center;justify-content:flex-end;gap:5px;font-size:.88rem;font-weight:600;color:var(--fita-kr);min-width:58px;transition:opacity .4s}
   .cards-dica.some{opacity:0}
 }
 
@@ -377,7 +384,7 @@ section{padding:clamp(64px,9vw,120px) clamp(16px,4vw,56px)}
 /* contadores em casas fixas: só o dígito que mudou troca */
 .dig{display:inline-flex;gap:3px}
 .dig-c{display:inline-block;width:1.05em;height:1.42em;overflow:hidden;background:var(--tinta);color:var(--cal);font:900 1.75rem/1.42 var(--font-stencil),sans-serif;text-align:center}
-.dig-c.zero{color:#5E5950}
+.dig-c.zero{color:#6E685E}
 .dig-d{display:block;animation:cai .34s cubic-bezier(.2,.8,.2,1)}
 @keyframes cai{from{transform:translateY(-100%)}}
 .ruim .dig-c{background:var(--corte)}.ruim .dig-c.zero{color:#F2B3AE}
@@ -570,8 +577,117 @@ body:has(.menu-cel) .orc-barra{display:none}
 .mk-layer{position:absolute;top:0;left:0;overflow:visible;pointer-events:none}
 .mk-under{z-index:-1}.mk-over{z-index:1}
 
-/* =========================== KokonutUI: Dot Field (meio-tom atrás do contato) =========================== */
+/* =========================== fundo do contato: faces do bloco com os furos, em amarração =========================== */
 .df{position:relative;overflow:hidden;margin-inline:calc(-1 * clamp(16px,4vw,56px));padding-inline:clamp(16px,4vw,56px)}
-.df-campo{position:absolute;inset:0;pointer-events:none}
-.df-canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .5s ease-out;color:#EFE7D838}
+.fundo-furos{position:absolute;inset:0;z-index:0;pointer-events:none;color:var(--cal);opacity:.07}
+.ct{position:relative;isolation:isolate}
+.ct>.df,.ct>.rod{position:relative;z-index:1}
 .df>.ct-in{position:relative;z-index:1}
+
+/* =========================== orçamento em todos os caminhos (crítica 16/11) =========================== */
+/* catálogo e ficha da família → calculadora já com a linha escolhida */
+.card-calc{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:12px;padding:8px 0 0;background:none;border:0;border-top:1px solid var(--regua);
+  font:700 .95rem var(--font-texto),sans-serif;color:var(--fita);cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;text-decoration-thickness:2px;transition:text-decoration-color .2s}
+@media(hover:hover){.card-calc:hover{text-decoration-color:currentColor}}
+.fam-r .card-calc{width:auto;margin:0;padding:0;border:0;justify-content:flex-start}
+/* calculadora: confirma o que entrou no orçamento */
+.mod-ok{font:600 .95rem/1.45 var(--font-texto),sans-serif;color:var(--tinta)}
+.mod-ok:empty{margin-top:-18px}
+/* contato: a lista de peças vai junto */
+.ct-lista{font-size:.95rem;line-height:1.5;color:var(--cal);font-weight:600;padding-top:10px;border-top:1px solid #EFE7D840}
+/* seletor de quantidade: aviso de limite, colado embaixo do seletor */
+.qtd{position:relative}
+.qtd-max{position:absolute;left:-2px;right:-2px;top:calc(100% + 2px);z-index:3;padding:8px 10px;background:var(--tinta);color:var(--cal);font:600 .82rem/1.4 var(--font-texto),sans-serif}
+.qtd-max:empty{padding:0}
+@media(max-width:760px){.fam .qtd-add-r{display:none}}
+/* painel: depois do envio e o desfazer do "Limpar" */
+.orc-fim{display:grid;gap:12px;padding:20px 20px max(20px,env(safe-area-inset-bottom))}
+.orc-fim h3{font:800 1.7rem/1.1 var(--font-titulo),sans-serif;text-transform:uppercase}
+.orc-fim p{line-height:1.5;color:var(--corpo)}
+.orc-fim .bt{width:100%}
+.orc-nota a{font-weight:700;color:var(--tinta);text-decoration:none;border-bottom:2px solid var(--fita)}
+.orc-desfazer{background:none;border:0;padding:10px 0;font:700 1rem var(--font-texto),sans-serif;color:var(--fita);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* barra do orçamento cabe numa linha no celular */
+@media(max-width:480px){.orc-barra .orc-barra-l{display:none}.orc-barra p{white-space:nowrap}}
+/* selos: nenhuma palavra sozinha na última linha */
+.selos dd{text-wrap:pretty}
+/* toque: links pequenos do rodapé ganham área de 44 px sem mudar o desenho */
+@media(pointer:coarse){
+  .rod-priv,.card-calc{position:relative}
+  .rod-priv::after{content:"";position:absolute;inset:-14px -6px}
+}
+/* orçamento: excluir um produto de vez (o − anda de 1 em 1 e, em 1 peça, vira a lixeira) */
+.orc-nome{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center}
+.orc-nome b,.orc-nome span{grid-column:1}
+.orc-excluir{grid-column:2;grid-row:1/span 2;display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 2px;background:none;border:0;
+  font:600 .85rem var(--font-texto),sans-serif;color:var(--cinza);text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;cursor:pointer;transition:color .2s,text-decoration-color .2s}
+@media(hover:hover){.orc-excluir:hover{color:var(--tinta);text-decoration-color:currentColor}}
+.qtd .qtd-lixo{color:var(--cinza)}
+@media(hover:hover){.qtd .qtd-lixo:hover{color:var(--tinta)}}
+/* orçamento vazio: "catálogo" e "calcule uma parede" levam até a seção */
+.orc-ir{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--tinta);text-decoration:none;border-bottom:2px solid var(--fita);cursor:pointer}
+/* hero: a parede corre devagar para a direita, como carga na esteira (um módulo de 120 px por volta, sem emenda) */
+.fundo-esteira{position:absolute;top:0;left:-120px;width:calc(100% + 120px);height:100%;animation:esteira 18s linear infinite;will-change:transform}
+@keyframes esteira{to{transform:translateX(120px)}}
+.fundo-parede[data-parado] .fundo-esteira{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){.fundo-esteira{animation:none}}
+/* botão vazado: o texto troca de cor quando a fiada já cobriu metade do botão (nunca some sobre o fundo) */
+.bt.ln{transition:color .12s .2s,transform .15s}
+/* ficha da família: "Ver medidas" troca a foto pelo desenho técnico da peça, que se monta animado */
+.peca-f.iso-on{background:none;display:grid;place-items:center;padding:6px;color:var(--tinta)}
+.peca-f .iso{width:100%;height:100%;max-height:100%}
+.peca-z{align-self:flex-start;font-size:.9rem;padding:2px 0}
+/* contato: as faces de bloco correm na mesma esteira do hero, um pouco mais devagar (fundo de leitura) */
+.fundo-furos{overflow:hidden}
+.fundo-esteira.lenta{animation-duration:26s}
+.fundo-furos[data-parado] .fundo-esteira{animation-play-state:paused}
+/* "carregar o bloco": tijolinho que voa do botão até o orçamento (lib/carregar.ts) */
+.voo{position:fixed;left:0;top:0;z-index:300;pointer-events:none;will-change:transform,opacity}
+.voo svg{display:block;filter:drop-shadow(0 4px 6px #1C1A1755)}
+/* o destino "bate" ao receber a peça */
+.bate{animation:bate .5s cubic-bezier(.16,1,.3,1)}
+@keyframes bate{0%{transform:scale(1)}35%{transform:scale(1.09);background-color:var(--brasa);border-color:var(--brasa)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.bate{animation:bate-cor .6s ease-out}}
+@keyframes bate-cor{35%{background-color:var(--brasa);border-color:var(--brasa)}}
+/* promessas: os tijolinhos são assentados um a um quando a lista aparece (uma vez só) */
+.confere[data-assenta="espera"] .visto{opacity:0}
+.confere[data-assenta="feito"] .visto{animation:assenta-tijolo .45s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i) * 90ms)}
+@keyframes assenta-tijolo{from{opacity:0;transform:translateY(-18px) rotate(-6deg)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.confere[data-assenta="feito"] .visto{animation-name:aparece}}
+@keyframes aparece{from{opacity:0}to{opacity:1}}
+/* fábrica: marcos clicáveis (área de toque larga, mesmo desenho) e o atalho para o catálogo */
+.rail>button::after{content:"";position:absolute;inset:-14px -14px}
+.rail>button:focus-visible{outline-offset:6px}
+.linha-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.linha-pular{display:inline-flex;align-items:center;gap:6px;padding:10px 0;font:700 .95rem var(--font-texto),sans-serif;color:var(--tinta);text-decoration:none;border-bottom:2px solid var(--fita)}
+@media(hover:hover){.linha-pular:hover{color:var(--fita);}}
+.linha-wrap[data-parado] .guia-seta{animation-play-state:paused}
+/* ficha da família: no desktop o atalho da calculadora fica no rodapé; no celular sobe para o cabeçalho
+   e o rodapé vira só a barra "Revisar e enviar (N)" (antes ocupava metade da tela) */
+.fam-t{display:grid;gap:4px;min-width:0}
+.fam-calc-topo{display:none}
+@media(max-width:760px){
+  .fam-calc-topo{display:inline-flex;width:auto;margin:0;padding:0;min-height:36px;border:0;justify-content:flex-start;font-size:.9rem}
+  .fam-r p,.fam-calc-pe{display:none}
+  .fam-r{padding:10px 16px max(10px,env(safe-area-inset-bottom))}
+  .fam-r .bt{padding-block:12px}
+}
+/* a altura da foto e do desenho é a mesma: ligar "Ver medidas" não desalinha as fileiras */
+.peca-f.iso-on{aspect-ratio:4/3;overflow:hidden}
+/* revenda: "+ 1 carga" logo abaixo do seletor */
+.qtd-carga{display:inline-flex;align-items:center;gap:5px;margin-top:6px;min-height:36px;padding:0;background:none;border:0;cursor:pointer;
+  font:700 .88rem var(--font-texto),sans-serif;color:var(--fita);text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .2s}
+.qtd-carga .mono{font-weight:400;color:var(--cinza)}
+@media(hover:hover){.qtd-carga:hover{text-decoration-color:currentColor}}
+/* menu do celular: o número do WhatsApp por escrito, na largura toda */
+.menu-fones .menu-zap{grid-column:1/-1;display:flex;gap:8px;justify-content:center;align-items:center}
+/* contato com peças escolhidas: o resumo da lista no lugar do segundo formulário */
+.ct-resumo{display:grid;gap:14px;align-content:start}
+.ct-resumo ul{list-style:none;padding:0;border-top:1px solid #EFE7D840}
+.ct-resumo li{padding:10px 0;border-bottom:1px solid #EFE7D840;line-height:1.4}
+.ct-resumo li b{display:inline-block;min-width:5.5ch;color:var(--cal)}
+.ct-resumo li span{display:block;font-size:.85rem;color:var(--kraft)}
+/* topo: o "Cotar" reserva a largura do "(N)", então o menu não pula quando o orçamento ganha itens */
+@media(min-width:761px){.top .bt-sm{min-width:150px}}
+/* botões claros (hero, contato, barra): a fiada do hover em barro claro, visível sobre o papel */
+.hero .bt::before,.escuro .bt::before,.orc-barra .bt::before{background-color:var(--brasa2)}

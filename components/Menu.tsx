@@ -3,7 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FONES, wa } from "@/lib/dados";
 import { IcSeta, IcWhats } from "./Icone";
-import Rola from "./Rola";
+import Cotar from "./Cotar";
 
 // Ícone de cada seção: todos no mesmo traço (1.6, pontas quadradas), grade de 28 px,
 // tinta sobre o mesmo quadrado kraft, para as quatro miniaturas lerem como uma família.
@@ -64,8 +64,10 @@ export default function Menu() {
                 <p className="menu-h"><b>Atendimento</b> Segunda a sexta, 7h30 às 18h · Sábado, 7h30 às 12h</p>
                 <div className="menu-fones">
                   {FONES.slice(0, 2).map((f) => <a key={f.tel} href={`tel:${f.tel}`}>{f.label}</a>)}
+                  {/* o número que atende no WhatsApp, por escrito (o Cotar abaixo abre a conversa) */}
+                  <a className="menu-zap" href={wa()} target="_blank" rel="noopener noreferrer"><IcWhats size={16} />WhatsApp {FONES[2].label}</a>
                 </div>
-                <a className="bt" target="_blank" rel="noopener noreferrer" href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}><Rola><IcWhats />Cotar no WhatsApp</Rola></a>
+                <Cotar onClick={() => setAberto(false)} />
               </div>
             </motion.nav>
           </motion.div>

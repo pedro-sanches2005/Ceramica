@@ -1,15 +1,15 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { fmt, itens, modulos, wa, type Modulo } from "@/lib/dados";
-import { useOrcamento } from "@/lib/orcamento";
-import { IcWhats } from "./Icone";
-import NotaCotacao from "./NotaCotacao";
+import { fmt, itens, modulos, type Modulo } from "@/lib/dados";
+import { useOrcamento, type ItemOrc } from "@/lib/orcamento";
+import { IcMais } from "./Icone";
+import { carregar } from "@/lib/carregar";
 import Rola from "./Rola";
-import { Mark, MarkerText } from "./MarkerText";
 
 const J = 1;  // junta de argamassa, cm
-const FH = 20; // altura de uma fiada: bloco de 19 cm + junta
+// altura de uma fiada: bloco (19 cm na maioria das linhas, 14 cm na 11,5 × 24) + junta
+const alturaFiada = (m: Modulo) => (m.h ?? 19) + J;
 
 type Peca = { x: number; c: number; t: "int" | "meio" | "corte" | "u" };
 type Fiada = Peca[];
@@ -28,7 +28,7 @@ function fiada(L: number, m: Modulo, impar: boolean): Fiada {
 }
 
 function paginar(L: number, H: number, m: Modulo, cinta: boolean) {
-  const n = Math.max(1, Math.floor((H + J) / FH));
+  const n = Math.max(1, Math.floor((H + J) / alturaFiada(m)));
   const linhas: Fiada[] = [];
   for (let i = 0; i < n; i++) {
     let f = fiada(L, m, i % 2 === 1);
@@ -40,12 +40,22 @@ function paginar(L: number, H: number, m: Modulo, cinta: boolean) {
   return { n, linhas, conta };
 }
 
-// Comprimentos "modulados" (múltiplos do meio módulo, menos uma junta) não pedem nenhum corte.
+// Comprimento "modulado": as duas fiadas (a que começa com inteiro e a que começa com meio) fecham sem corte.
+// Procura o mais próximo abaixo e acima; vale para qualquer linha, inclusive a 11,5 × 24.
+const MIN_L = 60, MAX_L = 1000;
+const semCorte = (L: number, m: Modulo) => [false, true].every((impar) => !fiada(L, m, impar).some((q) => q.t === "corte"));
 function sugestoes(L: number, m: Modulo) {
-  const passo = m.meio + J;
-  const k = (L + J) / passo;
-  const baixo = Math.floor(k) * passo - J, cima = Math.ceil(k) * passo - J;
-  return baixo === cima ? [] : [baixo, cima].filter((v) => v >= m.l);
+  if (semCorte(L, m)) return [];
+  let baixo = 0, cima = 0;
+  for (let v = L - 1; v >= Math.max(MIN_L, m.l); v--) if (semCorte(v, m)) { baixo = v; break; }
+  for (let v = L + 1; v <= MAX_L; v++) if (semCorte(v, m)) { cima = v; break; }
+  return [baixo, cima].filter(Boolean);
+}
+// a medida sem corte mais próxima (usada quando a linha chega do catálogo)
+function maisProxima(L: number, m: Modulo) {
+  if (semCorte(L, m)) return L;
+  const s = sugestoes(L, m);
+  return s.length ? s.reduce((a, b) => (Math.abs(b - L) < Math.abs(a - L) ? b : a)) : L;
 }
 
 // Contagem em casas fixas, como número estampado na carga: só o dígito que mudou troca (e cai).
@@ -78,8 +88,7 @@ export default function Modulador() {
       if (!mod) return;
       setId(novo);
       // arredonda o comprimento para a medida modulada mais próxima dessa linha: a parede fecha sem corte
-      const passo = mod.meio + J;
-      setL((atual) => Math.max(mod.l, Math.round((atual + J) / passo) * passo - J));
+      setL((atual) => maisProxima(atual, mod));
     };
     window.addEventListener("incargel:linha", ouvir);
     return () => window.removeEventListener("incargel:linha", ouvir);
@@ -92,34 +101,59 @@ export default function Modulador() {
   const m = modulos.find((x) => x.id === id)!;
   const { n, linhas, conta } = useMemo(() => paginar(L, H, m, cinta), [L, H, m, cinta]);
   const sug = sugestoes(L, m);
-  const alto = n * FH - J;
-  // as peças da linha que a parede usa, para somar no orçamento
+  const fh = alturaFiada(m), hb = m.h ?? 19;
+  const alto = n * fh - J;
+  // As peças da parede vão para o mesmo orçamento do catálogo.
+  // Adicionar de novo SUBSTITUI a parede anterior (não soma em dobro); o resto do orçamento fica como está.
   const orc = useOrcamento();
-  const [somou, setSomou] = useState(false);
+  const contribuicao = useRef<{ item: ItemOrc; q: number }[]>([]);
+  const [adicionada, setAdicionada] = useState<string | null>(null); // resumo da última parede posta no orçamento
+  const chaveParede = `${id}-${L}-${H}-${cinta}`;
+  const [chaveAdicionada, setChaveAdicionada] = useState("");
   function addOrcamento() {
     const linha = itens.find((x) => x.id === m.id);
     if (!linha) return;
     const achar = (f: (img: string, nome: string) => boolean) => linha.pecas.find((p) => f(p.img, p.nome));
-    const add = (p: (typeof linha.pecas)[number] | undefined, q: number) => { if (p && q > 0) orc.somar({ id: p.img, nome: p.nome, dim: p.dim, linha: linha.linha, img: p.img }, q); };
-    add(linha.pecas[0], conta.int);
-    add(achar((_, nome) => nome.startsWith("Meio bloco")), conta.meio);
-    add(achar((img) => img.endsWith("canaleta-u")), conta.u);
-    setSomou(true); setTimeout(() => setSomou(false), 2400);
-  }
-  const nomeInt = `${fmt(m.w)}×19×${m.l}`, nomeMeio = `${fmt(m.w)}×19×${m.meio}`;
+    const inteiro = linha.pecas[0], meio = achar((_, nome) => nome.startsWith("Meio bloco")), canaleta = achar((img) => img.endsWith("canaleta-u"));
+    // peça cortada sai de um bloco: de um meio quando o pedaço cabe nele, senão de um inteiro
+    const cortes = linhas.flat().filter((q) => q.t === "corte");
+    const corteMeio = meio ? cortes.filter((q) => q.c <= m.meio).length : 0;
+    const corteInt = cortes.length - corteMeio;
 
-  const msg =
-    `Olá! Fiz a paginação de uma parede no site da Incargel.\n\n` +
-    `Linha: ${m.nome}\nParede: ${m2(L)} m × ${m2(alto)} m (${n} fiadas)\n\n` +
-    `Blocos inteiros ${nomeInt}: ${conta.int}\nMeios blocos ${nomeMeio}: ${conta.meio}\n` +
-    (conta.u ? `Canaletas U: ${conta.u}\n` : "") +
-    (conta.corte ? `Peças cortadas: ${conta.corte}\n` : "") +
-    `\nPode me passar uma cotação?`;
+    // o que esta parede pede, somando por peça
+    const pede = new Map<string, { item: ItemOrc; q: number }>();
+    const soma = (p: (typeof linha.pecas)[number] | undefined, q: number) => {
+      if (!p || q <= 0) return;
+      const atual = pede.get(p.img);
+      pede.set(p.img, { item: { id: p.img, nome: p.nome, dim: p.dim, linha: linha.linha, img: p.img, qtd: 0 }, q: (atual?.q ?? 0) + q });
+    };
+    soma(inteiro, conta.int + corteInt);
+    soma(meio, conta.meio + corteMeio);
+    soma(canaleta, conta.u);
+
+    // Adicionar de novo troca a parede anterior pela nova, sem apagar o que a pessoa mudou à mão:
+    // cada peça fica com (quantidade atual + diferença entre parede nova e antiga), e nunca menos do que a parede pede.
+    const antes = new Map(contribuicao.current.map((c) => [c.item.id, c]));
+    antes.forEach(({ item, q }, idPeca) => { if (!pede.has(idPeca)) orc.definir(item, Math.max(0, orc.qtd(idPeca) - q)); });
+    pede.forEach(({ item, q }, idPeca) => { orc.definir(item, Math.max(orc.qtd(idPeca) + q - (antes.get(idPeca)?.q ?? 0), q)); });
+    contribuicao.current = [...pede.values()];
+
+    const partes = [
+      `${conta.int} ${conta.int === 1 ? "inteiro" : "inteiros"}`,
+      conta.meio ? `${conta.meio} ${conta.meio === 1 ? "meio" : "meios"}` : "",
+      conta.u ? `${conta.u} ${conta.u === 1 ? "canaleta" : "canaletas"}` : "",
+      corteInt ? `+${corteInt} ${corteInt === 1 ? "inteiro" : "inteiros"} para corte` : "",
+      corteMeio ? `+${corteMeio} ${corteMeio === 1 ? "meio" : "meios"} para corte` : "",
+    ].filter(Boolean);
+    setAdicionada(`Parede no orçamento: ${partes.join(", ")}`);
+    setChaveAdicionada(chaveParede);
+  }
+  const nomeInt = `${fmt(m.w)}×${hb}×${m.l}`, nomeMeio = `${fmt(m.w)}×${hb}×${m.meio}`;
 
   return (
     <section id="paginacao" className="mod">
       <header className="mod-h">
-        <MarkerText as="h2">Desenhe a parede.<br /><em>A gente conta <Mark type="underline" color="var(--fita)">bloco por bloco</Mark>.</em></MarkerText>
+        <h2>Desenhe a parede.<br /><em>A gente conta bloco por bloco.</em></h2>
         <p>Bloco modulado não é estimativa por metro quadrado: dá para saber a quantidade exata de peças, fiada por fiada. Ajuste a parede e veja onde entra cada inteiro, cada meio bloco e se vai sobrar corte.</p>
       </header>
 
@@ -167,9 +201,10 @@ export default function Modulador() {
           )}
 
           <p className="mod-aviso">Conta para parede corrida, com juntas de 1 cm, sem portas, janelas ou encontros. Para o projeto completo, a equipe Incargel faz a modulação com você.</p>
-          <a className="bt" target="_blank" rel="noopener noreferrer" href={wa(msg)}><Rola><IcWhats />Cotar esta parede</Rola></a>
-          <button type="button" className="bt ln" onClick={addOrcamento}><Rola>{somou ? "Adicionado ao orçamento" : "Adicionar ao orçamento"}</Rola></button>
-          <NotaCotacao />
+          <button type="button" className="bt" onClick={(e) => { carregar(e.currentTarget); addOrcamento(); }}><Rola><IcMais size={16} />Adicionar parede ao orçamento</Rola></button>
+          {/* confirma o que entrou; some quando a parede muda (aí o botão substitui a anterior) */}
+          <p className="mod-ok" role="status">{adicionada && chaveAdicionada === chaveParede ? adicionada : ""}</p>
+          <p className="nota-cot">A parede entra no mesmo orçamento do catálogo. Você revisa e envia tudo de uma vez.</p>
         </form>
 
         <div className="mod-art">
@@ -186,7 +221,7 @@ export default function Modulador() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: i * 0.05, ease: [0.2, 0.8, 0.2, 1] }}>
                 {f.map((q) => (
-                  <rect key={q.x} className={`pc ${q.t}`} x={q.x} y={(n - 1 - i) * FH} width={q.c} height={19} rx={0.8} />
+                  <rect key={q.x} className={`pc ${q.t}`} x={q.x} y={(n - 1 - i) * fh} width={q.c} height={hb} rx={0.8} />
                 ))}
               </motion.g>
             ))}

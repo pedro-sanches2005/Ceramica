@@ -1,6 +1,6 @@
 "use client";
-import { useRef, useState } from "react";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import GuiaRolagem from "./GuiaRolagem";
 import { IcSeta } from "./Icone";
 import { useCelular } from "@/lib/useCelular";
@@ -19,23 +19,56 @@ const est = [
 ];
 const recorte = (f: string) => (f === "aerea.webp" ? " recorte" : "");
 
-// Desktop: a rolagem vertical empurra o trilho para o lado (versão original da seção).
-// Mais curso de rolagem por etapa e mola mais macia: o trilho anda num ritmo confortável.
+// O tijolinho "chega" num marco um pouco antes de ficar exatamente em cima dele (6% do trecho).
+const CHEGOU = 0.06;
+export const etapaDe = (v: number, n: number) => Math.max(0, Math.min(n - 1, Math.floor(v * (n - 1) + CHEGOU)));
+
+// Tijolinho que anda pela linha: a face do bloco cerâmico com os furos, assentado sobre o trilho.
+function Tijolinho() {
+  return (
+    <svg viewBox="0 0 34 20" width="46" height="27" aria-hidden>
+      <rect x="1" y="1" width="32" height="18" rx="1.5" fill="var(--brasa)" stroke="var(--tinta)" strokeWidth="2" />
+      {[5, 12.5, 20, 27.5].map((x) => <rect key={x} x={x - 2.2} y="5" width="4.4" height="10" rx=".8" fill="var(--tinta)" opacity=".75" />)}
+    </svg>
+  );
+}
+
+// Desktop: a rolagem vertical leva o tijolinho pela linha; cada etapa aparece inteira
+// quando ele chega no marco dela (antes, o trilho deslizava junto e mostrava duas etapas pela metade).
 function LinhaDesktop({ ativo }: { ativo: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  const reduz = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const sp = useSpring(scrollYProgress, { stiffness: 90, damping: 26, mass: 0.5, restDelta: 0.0005 });
-  const x = useTransform(sp, (v) => `translate3d(${-v * (est.length - 1) * 100}vw,0,0)`);
   const pos = useTransform(sp, [0, 1], ["0%", "100%"]);
+  const [etapa, setEtapa] = useState(0);
+  useMotionValueEvent(sp, "change", (v) => setEtapa(etapaDe(v, est.length)));
+  // a seta do guia "Role para avançar" só quica com a seção na tela
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    const io = new IntersectionObserver(([e]) => el.toggleAttribute("data-parado", !e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  // clicar num marco leva a rolagem até a etapa dele (o tijolinho para em cima do marco)
+  function irEtapa(i: number) {
+    const el = ref.current; if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY + (i / (est.length - 1)) * (el.offsetHeight - window.innerHeight);
+    const lenis = (window as Window & { __lenis?: { scrollTo: (y: number) => void } }).__lenis;
+    if (lenis) lenis.scrollTo(y); else window.scrollTo({ top: y, behavior: reduz ? "auto" : "smooth" });
+  }
   return (
     <div ref={ref} className="linha-wrap">
       <section className="linha">
         <header className="linha-h">
           <h2>Do barro à obra</h2>
+          <a className="linha-pular" href="#blocos">Pular para os blocos <IcSeta size={14} dir="baixo" /></a>
         </header>
-        <motion.div className="trilha" style={ativo ? { transform: x } : undefined}>
-          {est.map((e) => (
-            <article key={e.n} className="painel">
+        <motion.div className="trilha" initial={false}
+          animate={ativo ? { x: `${-etapa * 100}vw` } : undefined}
+          transition={reduz ? { duration: 0 } : { type: "spring", stiffness: 170, damping: 28, mass: 0.9 }}>
+          {est.map((e, i) => (
+            <article key={e.n} className="painel" inert={ativo && i !== etapa} aria-hidden={ativo && i !== etapa}>
               <div className="painel-txt">
                 <b className="num">{e.n}</b>
                 <h3>{e.t}</h3>
@@ -47,9 +80,12 @@ function LinhaDesktop({ ativo }: { ativo: boolean }) {
             </article>
           ))}
         </motion.div>
-        <div className="rail" aria-hidden>
-          {est.map((e, i) => <i key={e.n} style={{ left: `${(i / (est.length - 1)) * 100}%` }} />)}
-          <motion.span className="peca" style={{ left: pos }} />
+        <div className="rail">
+          {est.map((e, i) => (
+            <button key={e.n} type="button" className={i <= etapa ? "on" : undefined} style={{ left: `${(i / (est.length - 1)) * 100}%` }}
+              onClick={() => irEtapa(i)} aria-label={`Etapa ${e.n}: ${e.t}`} aria-current={i === etapa ? "step" : undefined} />
+          ))}
+          <motion.span className="peca" style={{ left: pos }} aria-hidden><Tijolinho /></motion.span>
         </div>
         {ativo && <GuiaRolagem p={sp} texto="Role para avançar" passos={est.length} />}
       </section>
