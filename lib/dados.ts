@@ -102,7 +102,8 @@ export const itens: Item[] = [
 ];
 
 export const fmt = (n: number) => String(n).replace(".", ",");
-export const fotoPeca = (img: string) => `/pecas/${img}.png`;
+// WebP gerado por scripts/otimizar-imagens.mjs a partir dos PNG originais (84% mais leve)
+export const fotoPeca = (img: string) => `/pecas/${img}.webp`;
 // Furo vertical (estruturais e a vedação 9/39 "furo vertical") ou horizontal (vedação comum): muda o desenho técnico.
 export const furoDe = (i: { id: string; fam: Item["fam"] }): "v" | "h" => (i.fam === "Estrutural" || i.id === "v939" ? "v" : "h");
 export const totalPecas = itens.reduce((s, i) => s + i.pecas.length, 0);

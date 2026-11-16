@@ -23,7 +23,7 @@ export default function Hero() {
             <NotaCotacao />
           </div>
           <figure className="hero-foto">
-            <img src="/fabrica/blocos.jpg" alt="Pilhas de blocos cerâmicos da Incargel prontos para a expedição" width={615} height={410} decoding="async" fetchPriority="high" />
+            <img src="/fabrica/blocos.webp" alt="Pilhas de blocos cerâmicos da Incargel prontos para a expedição" width={615} height={410} decoding="async" fetchPriority="high" />
             <figcaption>Blocos prontos para a expedição · Itu/SP</figcaption>
           </figure>
         </div>

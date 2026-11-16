@@ -1,58 +1,69 @@
 "use client";
-import BlocoIso from "./BlocoIso";
-import { IcSeta, IcWhats } from "./Icone";
+import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import Qtd from "./Qtd";
 import Rola from "./Rola";
-import { fotoPeca, furoDe, modulos, wa, type Item } from "@/lib/dados";
+import { fotoPeca, type Item } from "@/lib/dados";
+import { useOrcamento } from "@/lib/orcamento";
 
-// Detalhe que abre dentro da própria linha do catálogo (sem janela por cima):
-// desenho técnico com todos os dados, a lista de peças da família e os dois atalhos da compra.
-export default function Familia({ it }: { it: Item }) {
-  const tipo = it.fam === "Estrutural" ? "estrutural" : "de vedação";
-  const temSimulador = modulos.some((m) => m.id === it.id);
-  const tudo = wa(
-    `Olá! Vim pelo site da Incargel e gostaria de uma cotação da linha ${tipo} ${it.linha}:\n\n` +
-    it.pecas.map((p) => `• ${p.nome} ${p.dim} cm: ___ peças`).join("\n") +
-    `\n\nCidade da obra: `
-  );
-  // o simulador escuta este aviso e já abre com a linha escolhida
-  const calcular = () => window.dispatchEvent(new CustomEvent("incargel:linha", { detail: it.id }));
+// Ficha da linha inteira (versão do main): todas as peças da família, com medidas e dados.
+// Em cada peça, a quantidade vai direto para o orçamento.
+export default function Familia({ it, onClose }: { it: Item; onClose: () => void }) {
+  const fechar = useRef<HTMLButtonElement>(null);
+  const { itens, abrir } = useOrcamento();
+
+  useEffect(() => {
+    const antes = document.activeElement as HTMLElement | null;
+    const html = document.documentElement;
+    const ov = html.style.overflow;
+    html.style.overflow = "hidden";
+    fechar.current?.focus();
+    const tecla = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", tecla);
+    return () => { html.style.overflow = ov; window.removeEventListener("keydown", tecla); antes?.focus?.(); };
+  }, [onClose]);
 
   return (
-    <div className="lin-det">
-      <div className="lin-tec">
-        <div className="lin-iso"><BlocoIso dim={it.dim} cel={it.cel} furo={furoDe(it)} /></div>
-      </div>
+    <motion.div className="fam-ov" data-lenis-prevent onClick={onClose}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+      <motion.div className="fam" role="dialog" aria-modal="true" aria-labelledby={`fam-${it.id}`}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+        transition={{ type: "spring", stiffness: 260, damping: 32, mass: 0.9 }}>
+        <header className="fam-h">
+          <h2 id={`fam-${it.id}`}>Linha {it.fam === "Estrutural" ? "estrutural" : "de vedação"} {it.linha} <em>{it.pecas.length} peças</em></h2>
+          <button ref={fechar} type="button" className="fam-x" onClick={onClose} aria-label="Fechar">
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden><path d="M3 3l14 14M17 3L3 17" stroke="currentColor" strokeWidth="2.2" /></svg>
+          </button>
+        </header>
 
-      <div className="lin-pecas">
-        <h4>Família da linha {it.linha} <span className="mono">{it.pecas.length} peças</span></h4>
-        <ul>
-          {it.pecas.map((p) => (
-            <li key={p.img}>
-              <img src={fotoPeca(p.img)} alt={`${p.nome} ${p.dim} cm`} width={56} height={56} loading="lazy" decoding="async" />
-              <div className="pc-nome">
-                <b>{p.nome}</b>
-                <span className="mono">{p.dim} cm</span>
-              </div>
-              {p.specs.length > 0 ? (
-                <dl className="pc-d">{p.specs.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className="mono">{v}</dd></div>)}</dl>
-              ) : (
-                <span className="pc-d mono" aria-label="sem dados adicionais">—</span>
-              )}
-              <a className="card-z" target="_blank" rel="noopener noreferrer"
-                href={wa(`Olá! Vim pelo site da Incargel e gostaria de uma cotação: ${p.nome.toLowerCase()} ${p.dim} cm (linha ${tipo} ${it.linha}).`)}
-                aria-label={`Cotar ${p.nome} ${p.dim} cm no WhatsApp`}>
-                <IcWhats size={15} />Cotar
-              </a>
-            </li>
-          ))}
-        </ul>
-        <div className="lin-acoes">
-          <a className="bt" target="_blank" rel="noopener noreferrer" href={tudo}><Rola><IcWhats />Cotar a linha inteira</Rola></a>
-          {temSimulador && (
-            <a className="bt ln" href="#paginacao" onClick={calcular}><Rola>Calcular parede com esta linha <IcSeta size={16} dir="baixo" /></Rola></a>
-          )}
+        <div className="fam-sc">
+          <ul className="fam-g">
+            {it.pecas.map((p) => (
+              <li key={p.img} className="peca-t">
+                <div className="peca-f">
+                  <img src={fotoPeca(p.img)} alt={`${p.nome} ${p.dim} cm`} loading="lazy" decoding="async" />
+                </div>
+                <div className="peca-i">
+                  <h3>{p.nome}</h3>
+                  <p className="mono">{p.dim} <small>cm</small></p>
+                  {p.specs.length > 0 && (
+                    <dl>{p.specs.map(([k, v]) => <div key={k}><dt>{k}</dt><dd className="mono">{v}</dd></div>)}</dl>
+                  )}
+                  <div className="peca-q"><Qtd item={{ id: p.img, nome: p.nome, dim: p.dim, linha: it.linha, img: p.img }} compacto /></div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </div>
+
+        <footer className="fam-r">
+          <p>Escolha a quantidade de cada peça; tudo vai para o mesmo orçamento e sai numa mensagem só no WhatsApp.</p>
+          <button type="button" className="bt" onClick={() => { onClose(); abrir(); }} disabled={itens.length === 0}>
+            <Rola>Ver orçamento{itens.length > 0 ? ` (${itens.length})` : ""}</Rola>
+          </button>
+        </footer>
+      </motion.div>
+    </motion.div>
   );
 }

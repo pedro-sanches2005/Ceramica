@@ -20,7 +20,7 @@ export default function Impacto() {
       <h2>O que muda quando a parede é cerâmica</h2>
       <article className="laudo">
         <dl className="laudo-cab">
-          <div><dt>Comparação</dt><dd className="mono">Bloco cerâmico × bloco de concreto</dd></div>
+          <div><dt>Comparação</dt><dd>Bloco cerâmico × bloco de concreto</dd></div>
         </dl>
         <table className="laudo-t">
           <caption>Resultados</caption>

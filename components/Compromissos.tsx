@@ -1,3 +1,4 @@
+import { Mark, MarkerText } from "./MarkerText";
 // Compromissos: afirmações grandes com o visto, selos numa tabela com quem os concede
 // e a dica em destaque tipográfico. Nada de papel imitado.
 const dif = [
@@ -18,7 +19,7 @@ const selos = [
 export default function Compromissos() {
   return (
     <section className="comp">
-      <h2>O que você pode cobrar da gente.</h2>
+      <MarkerText as="h2">O que você pode <Mark type="underline" color="var(--barro2)">cobrar</Mark> da gente.</MarkerText>
       <ul className="confere">
         {dif.map(([a, b]) => (
           <li key={a}>

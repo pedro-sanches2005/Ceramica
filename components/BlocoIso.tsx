@@ -47,7 +47,7 @@ export default function BlocoIso({ dim, cel, furo = "h", prof, cotas = true }: P
   const furosV = furo === "v" ? Array.from({ length: nCel }, (_, i) => celula(i)) : [];
 
   const yw = y0 + H + 24, xh = x0 - 24;
-  const tx = { fontFamily: "var(--font-mono), monospace", fontSize: 15, fill: "currentColor", stroke: "none" } as const;
+  const tx = { fontFamily: "var(--font-tipo), monospace", fontSize: 15, fill: "currentColor", stroke: "none" } as const;
 
   return (
     <svg className="iso" viewBox={`0 0 ${vw} ${vh}`} role="img" aria-label={`Desenho esquemático do bloco ${fmt(w)} por ${h} por ${l} centímetros`}>

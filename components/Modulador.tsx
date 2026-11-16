@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { fmt, modulos, wa, type Modulo } from "@/lib/dados";
+import { fmt, itens, modulos, wa, type Modulo } from "@/lib/dados";
+import { useOrcamento } from "@/lib/orcamento";
 import { IcWhats } from "./Icone";
 import NotaCotacao from "./NotaCotacao";
 import Rola from "./Rola";
+import { Mark, MarkerText } from "./MarkerText";
 
 const J = 1;  // junta de argamassa, cm
 const FH = 20; // altura de uma fiada: bloco de 19 cm + junta
@@ -91,6 +93,19 @@ export default function Modulador() {
   const { n, linhas, conta } = useMemo(() => paginar(L, H, m, cinta), [L, H, m, cinta]);
   const sug = sugestoes(L, m);
   const alto = n * FH - J;
+  // as peças da linha que a parede usa, para somar no orçamento
+  const orc = useOrcamento();
+  const [somou, setSomou] = useState(false);
+  function addOrcamento() {
+    const linha = itens.find((x) => x.id === m.id);
+    if (!linha) return;
+    const achar = (f: (img: string, nome: string) => boolean) => linha.pecas.find((p) => f(p.img, p.nome));
+    const add = (p: (typeof linha.pecas)[number] | undefined, q: number) => { if (p && q > 0) orc.somar({ id: p.img, nome: p.nome, dim: p.dim, linha: linha.linha, img: p.img }, q); };
+    add(linha.pecas[0], conta.int);
+    add(achar((_, nome) => nome.startsWith("Meio bloco")), conta.meio);
+    add(achar((img) => img.endsWith("canaleta-u")), conta.u);
+    setSomou(true); setTimeout(() => setSomou(false), 2400);
+  }
   const nomeInt = `${fmt(m.w)}×19×${m.l}`, nomeMeio = `${fmt(m.w)}×19×${m.meio}`;
 
   const msg =
@@ -104,13 +119,13 @@ export default function Modulador() {
   return (
     <section id="paginacao" className="mod">
       <header className="mod-h">
-        <h2>Desenhe a parede.<br /><em>A gente conta bloco por bloco.</em></h2>
+        <MarkerText as="h2">Desenhe a parede.<br /><em>A gente conta <Mark type="underline" color="var(--fita)">bloco por bloco</Mark>.</em></MarkerText>
         <p>Bloco modulado não é estimativa por metro quadrado: dá para saber a quantidade exata de peças, fiada por fiada. Ajuste a parede e veja onde entra cada inteiro, cada meio bloco e se vai sobrar corte.</p>
       </header>
 
       <div className="mod-in">
         <form className="mod-f" onSubmit={(e) => e.preventDefault()}>
-          <label className="mono">Linha
+          <label>Linha
             <select value={id} onChange={(e) => setId(e.target.value)}>
               {(["Estrutural", "Vedação"] as const).map((f) => (
                 <optgroup key={f} label={f}>
@@ -119,16 +134,16 @@ export default function Modulador() {
               ))}
             </select>
           </label>
-          <label className="mono">
+          <label>
             <span className="mod-lv">Comprimento <b>{m2(L)} m</b></span>
             <input type="range" min={60} max={1000} step={1} value={L} onChange={(e) => setL(+e.target.value)} />
           </label>
-          <label className="mono">
+          <label>
             <span className="mod-lv">Altura <b>{m2(H)} m</b></span>
             <input type="range" min={60} max={320} step={1} value={H} onChange={(e) => setH(+e.target.value)} />
           </label>
           {m.u && (
-            <label className="mod-ck mono">
+            <label className="mod-ck">
               <input type="checkbox" checked={cinta} onChange={(e) => setCinta(e.target.checked)} />
               Última fiada em canaleta U (cinta)
             </label>
@@ -153,6 +168,7 @@ export default function Modulador() {
 
           <p className="mod-aviso">Conta para parede corrida, com juntas de 1 cm, sem portas, janelas ou encontros. Para o projeto completo, a equipe Incargel faz a modulação com você.</p>
           <a className="bt" target="_blank" rel="noopener noreferrer" href={wa(msg)}><Rola><IcWhats />Cotar esta parede</Rola></a>
+          <button type="button" className="bt ln" onClick={addOrcamento}><Rola>{somou ? "Adicionado ao orçamento" : "Adicionar ao orçamento"}</Rola></button>
           <NotaCotacao />
         </form>
 

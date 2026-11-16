@@ -5,6 +5,8 @@ import { IcWhats, IcSeta } from "./Icone";
 import NotaCotacao from "./NotaCotacao";
 import Marca from "./Marca";
 import Rola from "./Rola";
+import DotField from "./DotField";
+import { Mark, MarkerText } from "./MarkerText";
 
 export default function Contato() {
   // depois do envio: guarda o link para reabrir caso o navegador tenha bloqueado a nova aba
@@ -33,9 +35,11 @@ export default function Contato() {
 
   return (
     <section id="contato" className="ct escuro">
+      {/* Dot Field (KokonutUI): pontos em meio-tom atrás do contato; o conteúdo fica por cima */}
+      <DotField className="ct-pontos" spacing={18}>
       <div className="ct-in">
         <div>
-          <h2>Vamos orçar<br />a sua obra?</h2>
+          <MarkerText as="h2">Vamos orçar<br /><Mark type="underline" color="var(--brasa2)">a sua obra</Mark>?</MarkerText>
           <p className="ct-p">Entregamos em todo o Estado de São Paulo (frete sob consulta).</p>
           <dl className="ct-d">
             <div><dt>Telefones</dt><dd>{FONES.map((f) => <a key={f.tel} href={`tel:${f.tel}`}>{f.label}</a>)}</dd></div>
@@ -61,6 +65,7 @@ export default function Contato() {
           )}
         </form>
       </div>
+      </DotField>
       {/* rodapé: marca, navegação e cotação; a palavra INCARGEL em estêncil fecha a página como o nome na lateral da carga */}
       <footer className="rod">
         <div className="rod-top">
@@ -78,7 +83,7 @@ export default function Contato() {
             href={wa("Olá! Vim pelo site da Incargel e gostaria de uma cotação.")}><Rola><IcWhats />Cotar no WhatsApp</Rola></a>
         </div>
         <p className="carimbo" aria-hidden>INCARGEL</p>
-        <div className="rod-base"><span>© Incargel · Indústria de Cerâmica · Itu/SP</span><a href="#topo">Voltar ao topo <IcSeta size={12} dir="cima" /></a></div>
+        <div className="rod-base"><span>© Incargel · Indústria de Cerâmica · Itu/SP · <button type="button" className="rod-priv" onClick={() => window.dispatchEvent(new Event("incargel:privacidade-abrir"))}>Privacidade</button></span><a href="#topo">Voltar ao topo <IcSeta size={12} dir="cima" /></a></div>
       </footer>
     </section>
   );

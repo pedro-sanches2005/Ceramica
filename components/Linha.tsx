@@ -6,18 +6,18 @@ import { IcSeta } from "./Icone";
 import { useCelular } from "@/lib/useCelular";
 
 const est = [
-  { n: "01", t: "Matéria-prima", f: "aerea.jpg", a: "Vista aérea da fábrica da Incargel em Itu, com a jazida ao fundo",
+  { n: "01", t: "Matéria-prima", f: "aerea.webp", a: "Vista aérea da fábrica da Incargel em Itu, com a jazida ao fundo",
     d: "Argila das jazidas que se veem atrás da fábrica. O bloco cerâmico nasce de elementos da natureza e não usa aditivos insalubres." },
-  { n: "02", t: "Linha automatizada", f: "robo.jpg", a: "Robô industrial empilhando blocos cerâmicos na linha de produção",
+  { n: "02", t: "Linha automatizada", f: "robo.webp", a: "Robô industrial empilhando blocos cerâmicos na linha de produção",
     d: "Produção totalmente automatizada, com tecnologia europeia, e robôs que aumentam a produtividade e a qualidade." },
-  { n: "03", t: "Forno túnel", f: "forno.jpg", a: "Vagoneta carregada de blocos na entrada do forno túnel",
+  { n: "03", t: "Forno túnel", f: "forno.webp", a: "Vagoneta carregada de blocos na entrada do forno túnel",
     d: "A temperatura é controlada ao longo de toda a queima, o que garante queima uniforme, padrão dimensional e resistência. A energia vem de sobras da indústria moveleira (serragem)." },
-  { n: "04", t: "Laboratório e normas", f: "controle.jpg", a: "Painel de controle da linha de produção ao lado dos blocos",
+  { n: "04", t: "Laboratório e normas", f: "controle.webp", a: "Painel de controle da linha de produção ao lado dos blocos",
     d: "Laboratório próprio para ensaios, e produtos conforme ABNT NBR 15270 e 15575. Certificada pelo PSQ, o Programa Setorial da Qualidade." },
-  { n: "05", t: "Entrega na obra", f: "blocos.jpg", a: "Pilhas de blocos cerâmicos prontos para a expedição",
+  { n: "05", t: "Entrega na obra", f: "blocos.webp", a: "Pilhas de blocos cerâmicos prontos para a expedição",
     d: "Pronta entrega e atendimento em todo o Estado de São Paulo, com frete sob consulta. A equipe visita a sua obra." },
 ];
-const recorte = (f: string) => (f === "aerea.jpg" ? " recorte" : "");
+const recorte = (f: string) => (f === "aerea.webp" ? " recorte" : "");
 
 // Desktop: a rolagem vertical empurra o trilho para o lado (versão original da seção).
 // Mais curso de rolagem por etapa e mola mais macia: o trilho anda num ritmo confortável.
@@ -42,7 +42,7 @@ function LinhaDesktop({ ativo }: { ativo: boolean }) {
                 <p>{e.d}</p>
               </div>
               <figure className={`foto${recorte(e.f)}`}>
-                <img src={`/fabrica/${e.f}`} alt={e.a} width={615} height={410} decoding="async" />
+                <img src={`/fabrica/${e.f}`} alt={e.a} width={615} height={410} loading="lazy" decoding="async" />
               </figure>
             </article>
           ))}
@@ -93,7 +93,7 @@ function LinhaCelular() {
         {est.map((e, i) => (
           <article key={e.n} className={`lc-card${i === idx ? " on" : ""}`} aria-hidden={i !== idx}>
             <figure className={`lc-foto${recorte(e.f)}`}>
-              <img src={`/fabrica/${e.f}`} alt={e.a} width={615} height={410} loading={i < 2 ? "eager" : "lazy"} decoding="async" />
+              <img src={`/fabrica/${e.f}`} alt={e.a} width={615} height={410} loading="lazy" decoding="async" />
               <b>{e.n}</b>
             </figure>
             <div className="lc-txt">

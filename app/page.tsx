@@ -10,9 +10,13 @@ import Menu from "@/components/Menu";
 import { IcWhats } from "@/components/Icone";
 import Rola from "@/components/Rola";
 import { wa } from "@/lib/dados";
+import { OrcamentoProvider } from "@/lib/orcamento";
+import Orcamento from "@/components/Orcamento";
+import Privacidade from "@/components/Privacidade";
 
 export default function Home() {
   return (
+    <OrcamentoProvider>
     <main>
       <header className="top">
         <a className="marca" href="#topo" aria-label="Incargel, início">
@@ -36,6 +40,9 @@ export default function Home() {
       <Impacto />
       <Compromissos />
       <Contato />
+      <Orcamento />
+      <Privacidade />
     </main>
+    </OrcamentoProvider>
   );
 }

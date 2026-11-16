@@ -156,6 +156,9 @@ export default function TopoBackground({ className, children, interval = 0.07, s
     if (!(root && canvas && ctx)) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // celular/toque: a deriva lenta redesenha a ~15 quadros/s (metade do desktop): mesma aparência, metade do trabalho e da bateria
+    const leve = window.matchMedia("(pointer: coarse), (max-width: 760px)").matches;
+    const idleMs = leve ? IDLE_FRAME_MS * 2 : IDLE_FRAME_MS;
     const noise = createNoise(seed);
     let width = 0, height = 0, cols = 0, rows = 0;
     let field = new Float32Array(0);
@@ -222,7 +225,7 @@ export default function TopoBackground({ className, children, interval = 0.07, s
       while (ripples.length > 0 && now - ripples[0].start > RIPPLE_MS) ripples.shift();
       const settling = hillMoving || ripples.length > 0;
       time += dt * speed;
-      if (settling || now - lastPaint >= IDLE_FRAME_MS) { paint(now); lastPaint = now; }
+      if (settling || now - lastPaint >= idleMs) { paint(now); lastPaint = now; }
       if (speed > 0 || settling) raf = requestAnimationFrame(frame);
     };
     const start = () => { if (!raf && visible && !reduceMotion) { last = 0; raf = requestAnimationFrame(frame); } };
